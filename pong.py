@@ -72,10 +72,10 @@ while carry_on:
 		ball.velocity[0] = -ball.velocity[0]
 	if ball.rect.x <= 0:
 		ball.velocity[0] = -ball.velocity[0]
-	if ball.rect.y >= 490:
+	if ball.rect.y > 490:
 		ball.velocity[1] = -ball.velocity[1]
-	if ball.velocity[1] <= 0:
-		ball.velocity[1] = -ball.velocity[1]
+	if ball.rect.y < 0:
+		ball.velocity[1] = -ball.velocity[1] 
 
 	# Detect collitions between the ball and the paddles
 	if pygame.sprite.collide_mask(ball, paddle_a) or pygame.sprite.collide_mask(ball, paddle_b):
