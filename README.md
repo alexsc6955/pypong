@@ -107,7 +107,7 @@ Project Link: [https://github.com/alexsc6955/pypong](https://github.com/alexsc69
 [issues-shield]: https://img.shields.io/github/issues/alexsc6955/pypong.svg?style=flat-square
 [issues-url]: https://github.com/alexsc6955/pypong/issues
 [license-shield]: https://img.shields.io/github/license/alexsc6955/pypong.svg?style=flat-square
-[license-url]: https://github.com/alexsc6955/pypong/blob/master/LICENSE.txt
+[license-url]: https://github.com/alexsc6955/pypong/blob/master/LICENSE
 [twitter-shield]: https://img.shields.io/badge/-Twitter-black.svg?style=flat-square&logo=twitter&colorB=555
 [twitter-url]: https://www.twitter.com/alexsc6955/
 <!-- [product-screenshot]: images/screenshot.png -->
