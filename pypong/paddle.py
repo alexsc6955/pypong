@@ -2,67 +2,38 @@
 Padde class for PyPong
 """
 
+from __future__ import annotations
 
-import pygame
+from mini_arcade_core import Backend, SpriteEntity
 
 from pypong.utils import logger
 
-from pypong.constants import BLACK
 
-
-class Paddle(pygame.sprite.Sprite):
+class Paddle(SpriteEntity):
     """
-    This class represents a paddle. It derives from the "Sprite" class in Pygame.
+    Paddle entity using mini-arcade-core's SpriteEntity.
     """
 
-    _logger = logger
+    def __init__(self, x: float, y: float, width: int, height: int, window_height: int):
+        super().__init__(x=x, y=y, width=width, height=height)
+        self.window_height = window_height
+        self.speed = 300.0
+        self.moving_up = False
+        self.moving_down = False
 
-    def __init__(self, name: str, color: tuple, width: int, height: int) -> None:
+        logger.info("Paddle created")
 
-        super().__init__()
+    def update(self, dt: float) -> None:  # override Entity.update
+        if self.moving_up:
+            self.y -= self.speed * dt
+        if self.moving_down:
+            self.y += self.speed * dt
 
-        self._name = name
+        # Clamp inside window
+        if self.y < 0:
+            self.y = 0
+        if self.y + self.height > self.window_height:
+            self.y = self.window_height - self.height
 
-        # Pass in the color of the paddle, and its x and y position, width and height.
-        # Set the background color and set it to be transparent
-        self.image = pygame.Surface([width, height])
-        self.image.fill(BLACK)
-        self.image.set_colorkey(BLACK)
-
-        # Draw the paddle (a rectangle!)
-        pygame.draw.rect(self.image, color, [0, 0, width, height])
-
-        # Fetch the rectangle object that has the dimensions of the image.
-        self.rect = self.image.get_rect()
-
-        self._logger.log(f'Paddle {self._name} created')
-
-    def move_up(self, pixels: int) -> None:
-        """
-        Move the paddle up.
-
-        :param pixels: The number of pixels to move the paddle up.
-        :type pixels: int
-
-        :rtype: None
-        """
-
-        self.rect.y -= pixels
-        # Check that you are not going too far (off the screen)
-        if self.rect.y < 0:
-            self.rect.y = 0
-
-    def move_down(self, pixels: int) -> None:
-        """
-        Move the paddle down.
-
-        :param pixels: The number of pixels to move the paddle down.
-        :type pixels: int
-
-        :rtype: None
-        """
-
-        self.rect.y += pixels
-        # Check that you are not going too far (off the screen)
-        if self.rect.y > 400:
-            self.rect.y = 400
+    def draw(self, surface: Backend) -> None:  # override Entity.draw
+        surface.draw_rect(int(self.x), int(self.y), self.width, self.height)

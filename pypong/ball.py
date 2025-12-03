@@ -2,57 +2,28 @@
 This module defines the Ball class.
 """
 
+from __future__ import annotations
 
-import pygame
+from mini_arcade_core import Backend, SpriteEntity
 
-from random import randint
-
-from pypong.utils import logger
-
-from pypong.constants import BLACK
+from .utils import logger
 
 
-class Ball(pygame.sprite.Sprite):
+class Ball(SpriteEntity):
     """
-    This class represents a ball. It derives from the "Sprite" class in Pygame.
+    Ball entity using SpriteEntity.
     """
 
-    _logger = logger
+    def __init__(self, x: float, y: float, width: int, height: int):
+        super().__init__(x=x, y=y, width=width, height=height)
+        self.vx = 250.0
+        self.vy = 200.0
 
+        logger.info("Ball created")
 
-    def __init__(self, color: tuple, width: int, height: int) -> None:
+    def update(self, dt: float) -> None:
+        self.x += self.vx * dt
+        self.y += self.vy * dt
 
-        # Call the parent class (Sprite) constructor
-        super().__init__()
-
-        # Pass in the color of the ball, its width and height.
-        # Set the background color and set it to be transparent
-        self.image = pygame.Surface([width, height])
-        self.image.fill(BLACK)
-        self.image.set_colorkey(BLACK)
-
-        # Draw the ball (a rectangle!)
-        pygame.draw.rect(self.image, color, [0, 0, width, height])
-
-        self.velocity = [randint(4, 8), randint(-8, 8)]
-
-        # Fetch the rectangle object that has the dimensions of the image.
-        self.rect = self.image.get_rect()
-
-        self._logger.log('Ball created')
-
-    def update(self) -> None:
-        """
-        Move the ball.
-        """
-
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
-
-    def bounce(self) -> None:
-        """
-        Bounce the ball.
-        """
-
-        self.velocity[0] = -self.velocity[0]
-        self.velocity[1] = randint(-8, 8)
+    def draw(self, surface: Backend) -> None:
+        surface.draw_rect(int(self.x), int(self.y), self.width, self.height)
