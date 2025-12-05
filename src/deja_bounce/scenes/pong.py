@@ -14,6 +14,7 @@ from mini_arcade_core import (
 )
 
 from deja_bounce.constants import PADDLE_SIZE
+from deja_bounce.controllers import CpuConfig, CpuPaddleController
 from deja_bounce.entities import Ball, Paddle
 from deja_bounce.utils import logger
 
@@ -56,6 +57,9 @@ class PongScene(Scene):
         self.left_score = 0
         self.right_score = 0
 
+        cpu_cfg = CpuConfig(max_speed=260.0, dead_zone=4.0)
+        self.cpu = CpuPaddleController(self.right, self.ball, config=cpu_cfg)
+
     def on_enter(self):
         logger.info("PongScene on_enter")
 
@@ -84,22 +88,11 @@ class PongScene(Scene):
             if event.key == ord("s"):
                 self.left.moving_down = True
 
-            # Right paddle: Up / Down arrows (adjust to your SDL keycodes)
-            if event.key == 1073741906:
-                self.right.moving_up = True
-            if event.key == 1073741905:
-                self.right.moving_down = True
-
         elif event.type == EventType.KEYUP:
             if event.key == ord("w"):
                 self.left.moving_up = False
             if event.key == ord("s"):
                 self.left.moving_down = False
-
-            if event.key == 1073741906:
-                self.right.moving_up = False
-            if event.key == 1073741905:
-                self.right.moving_down = False
 
     def update(self, dt: float):
         """
@@ -107,6 +100,8 @@ class PongScene(Scene):
         """
         for ent in self.entities:
             ent.update(dt)
+
+        self.cpu.update(dt)
 
         # Top/bottom bounce
         if self.ball.y <= 0:
