@@ -33,7 +33,10 @@ class EnsureClassName(logging.Filter):
         target_func = record.funcName  # function name that logged
 
         # Walk current stack; stop when we match the record’s file+func.
+        # Justification: Accessing protected member for logging purposes.
+        # pylint: disable=protected-access
         f = sys._getframe()
+        # pylint: enable=protected-access
         for _ in range(200):  # safety cap
             if f is None:
                 break

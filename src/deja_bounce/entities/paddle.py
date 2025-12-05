@@ -14,6 +14,7 @@ class Paddle(SpriteEntity):
     Paddle entity using mini-arcade-core's SpriteEntity.
     """
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self, x: float, y: float, width: int, height: int, window_height: int
     ):
@@ -39,8 +40,7 @@ class Paddle(SpriteEntity):
         self.vy = vy  # <--- store for inertia
 
         # Clamp inside window
-        if self.y < 0:
-            self.y = 0
+        self.y = max(self.y, 0)
         if self.y + self.height > self.window_height:
             self.y = self.window_height - self.height
 

@@ -1,3 +1,7 @@
+"""
+Minimal main application for Deja Bounce.
+"""
+
 from __future__ import annotations
 
 from mini_arcade_core import GameConfig, run_game

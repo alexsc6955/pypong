@@ -2,7 +2,13 @@
 Minimal Pong-like scene using mini-arcade-core.
 """
 
+# Justification: These imports are necessary for scene management
+# and may cause cyclic imports. They will be refactored later.
+# pylint: disable=cyclic-import
+
 from __future__ import annotations
+
+from collections import deque
 
 from mini_arcade_core import (
     Backend,
@@ -13,12 +19,13 @@ from mini_arcade_core import (
     SpriteEntity,
 )
 
-from deja_bounce.constants import PADDLE_SIZE, WHITE
+from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
 from deja_bounce.controllers import CpuConfig, CpuPaddleController
 from deja_bounce.entities import Ball, Paddle
 from deja_bounce.utils import logger
 
 
+# pylint: disable=too-many-instance-attributes
 class PongScene(Scene):
     """
     Minimal scene: opens a window, clears screen, handles quit/ESC.
@@ -60,6 +67,12 @@ class PongScene(Scene):
         cpu_cfg = CpuConfig(max_speed=260.0, dead_zone=4.0)
         self.cpu = CpuPaddleController(self.right, self.ball, config=cpu_cfg)
 
+        self.trail_enabled = True
+        self.trail = deque(maxlen=15)
+
+        self.photo_mode = False
+        self.add_overlay(self._photo_overlay)
+
     def on_enter(self):
         logger.info("PongScene on_enter")
 
@@ -77,8 +90,29 @@ class PongScene(Scene):
 
         if event.type == EventType.KEYDOWN:
             logger.debug(f"Key down: {event.key}")
+
+            if event.key == ord("t"):
+                self.trail_enabled = not self.trail_enabled
+
+            if event.key == ord("p"):
+                # toggle photo mode; ensure trail on when enabled
+                self.photo_mode = not self.photo_mode
+                if self.photo_mode:
+                    self.trail_enabled = True
+
+            if event.key == 1073741893:  # F12
+                self.game.screenshot(
+                    "screenshot.bmp", str(ROOT / "screenshots")
+                )
+                logger.info("Screenshot saved: screenshot.bmp")
+                return
+
             if event.key == 27:  # ESC
+                # Justification: Importing here to avoid cyclic import issues.
+                # pylint: disable=import-outside-toplevel
                 from deja_bounce.scenes.menu import MenuScene
+
+                # pylint: enable=import-outside-toplevel
 
                 self.game.change_scene(MenuScene(self.game))
                 return
@@ -145,6 +179,9 @@ class PongScene(Scene):
             logger.info(f"Left scores! {self.left_score} - {self.right_score}")
             self._reset_ball(direction=-1)
 
+        if self.trail_enabled and hasattr(self, "ball"):
+            self.trail.append((self.ball.x, self.ball.y))
+
     def draw(self, surface: Backend):  # type: ignore[override]
         """
         Draw the frame using the Backend as the 'surface'.
@@ -176,9 +213,27 @@ class PongScene(Scene):
             color=WHITE,
         )
 
+        # Ghost trail on top of background, under ball (order up to you)
+        if self.trail_enabled and self.trail:
+            count = len(self.trail)
+            for i, (x, y) in enumerate(self.trail):
+                t = (i + 1) / count  # 0..1
+                alpha = int(255 * t * 0.5)  # fade in, max 50% alpha
+                # if your ball is e.g. 12x12 rect:
+                size = 12
+                surface.draw_rect(
+                    int(x - size / 2),
+                    int(y - size / 2),
+                    size,
+                    size,
+                    (255, 255, 255, alpha),  # RGBA
+                )
+
         # Draw all entities
         for ent in self.entities:
             ent.draw(surface)
+
+        self.draw_overlays(surface)
 
     @staticmethod
     def _intersects(ball: Ball, paddle: Paddle) -> bool:
@@ -218,20 +273,58 @@ class PongScene(Scene):
             norm = 0.0
         norm = max(-1.0, min(1.0, norm))
 
-        BASE_VY = 220.0  # base vertical speed from angle
-        INERTIA_FACTOR = 0.3  # how much paddle.vy affects ball.vy
-        MAX_VY = 400.0  # safety clamp
+        base_vy = 220.0  # base vertical speed from angle
+        inertia_factor = 0.3  # how much paddle.vy affects ball.vy
+        max_vy = 400.0  # safety clamp
 
         # angle component + inertia from paddle velocity
-        new_vy = norm * BASE_VY + paddle.vy * INERTIA_FACTOR
+        new_vy = norm * base_vy + paddle.vy * inertia_factor
 
         # optional clamp so it doesn't go crazy fast
-        if new_vy > MAX_VY:
-            new_vy = MAX_VY
-        elif new_vy < -MAX_VY:
-            new_vy = -MAX_VY
+        if new_vy > max_vy:
+            new_vy = max_vy
+        elif new_vy < -max_vy:
+            new_vy = -max_vy
 
         self.ball.vy = new_vy
 
         # (optional) tiny speed-up on each hit to make rallies more intense
         self.ball.vx *= 1.03
+
+    def _photo_overlay(self, surface: Backend) -> None:
+        """
+        Overlay drawn on top of everything when photo_mode is enabled.
+        Perfect for promo/devlog screenshots.
+        """
+        if not self.photo_mode:
+            return
+
+        title = "Deja Bounce"
+        subtitle = "Finding the twist"
+        extra = "in a Pong-like"
+
+        # Simple positions for now – you can tune later.
+        x = 20
+        y = 60
+
+        surface.draw_text(
+            x,
+            y,
+            title,
+            color=(155, 155, 255),
+        )
+        surface.draw_text(
+            x,
+            y + 30,
+            subtitle,
+            color=(155, 155, 255),
+        )
+        surface.draw_text(
+            x,
+            y + 60,
+            extra,
+            color=(155, 155, 255),
+        )
+
+
+# pylint: enable=cyclic-import

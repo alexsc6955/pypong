@@ -1,3 +1,7 @@
+"""
+Minimal entity definitions for Deja Bounce.
+"""
+
 from __future__ import annotations
 
 from deja_bounce.entities.ball import Ball

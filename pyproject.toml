@@ -11,8 +11,8 @@ readme = "README.md"
 requires-python = ">=3.9,<3.12"
 license = { file = "LICENSE" }
 dependencies = [
-  "mini-arcade-core>=0.6.1",
-  "mini-arcade-native-backend>=0.2.3",
+  "mini-arcade-core~=0.7",
+  "mini-arcade-native-backend~=0.3",
 ]
 
 [project.optional-dependencies]
@@ -47,6 +47,7 @@ strict = false
 
 [tool.pylint.messages_control]
 disable = [
+  "logging-fstring-interpolation",
   "too-few-public-methods",
   "fixme",
 ]

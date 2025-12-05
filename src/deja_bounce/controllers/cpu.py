@@ -1,3 +1,7 @@
+"""
+Minimal CPU paddle controller for Deja Bounce.
+"""
+
 from __future__ import annotations
 
 import random
@@ -53,7 +57,15 @@ class CpuPaddleController:
         self.paddle.moving_up = False
         self.paddle.moving_down = False
 
+    # Justification: dt is unused but kept for interface consistency
+    # pylint: disable=unused-argument
     def update(self, dt: float) -> None:
+        """
+        Update CPU paddle movement based on ball position.
+
+        :param dt: Delta time since last update (unused).
+        :type dt: float
+        """
         # 1) If ball is moving LEFT, we don't care (we're on the right side)
         if self.ball.vx <= 0:
             self._stop()
@@ -67,7 +79,7 @@ class CpuPaddleController:
             return
 
         # When ball comes close again (new rally), pick a new vertical error
-        if distance_x > 0 and distance_x < self.config.reaction_distance * 0.9:
+        if 0 < distance_x < self.config.reaction_distance * 0.9:
             # you can make this more sophisticated; for now we keep a single offset
             pass
 

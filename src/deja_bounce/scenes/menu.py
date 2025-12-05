@@ -1,19 +1,24 @@
+"""
+Minimal main menu scene for Deja Bounce.
+"""
+
+# Justification: These imports are necessary for scene management
+# and may cause cyclic imports. They will be refactored later.
+# pylint: disable=cyclic-import
 from __future__ import annotations
 
 from mini_arcade_core import Backend, Event, EventType, Game, Scene
 
 from deja_bounce.constants import (
     BACKGROUND,
+    BUTTON_BORDER,
+    BUTTON_FILL,
     DIM,
     HIGHLIGHT,
     WHITE,
     WINDOW_SIZE,
-    BUTTON_FILL,
-    BUTTON_BORDER,
 )
 from deja_bounce.utils import logger
-
-from .pong import PongScene
 
 
 class MenuScene(Scene):
@@ -30,6 +35,9 @@ class MenuScene(Scene):
         self.width, self.height = WINDOW_SIZE
         self.selected_index = 0  # 0 = Start, 1 = Quit
 
+        self.add_overlay(self._title_overlay)
+        self.add_overlay(self._hint_overlay)
+
     # --- Scene lifecycle -----------------------------------------------------
 
     def on_enter(self) -> None:
@@ -41,6 +49,12 @@ class MenuScene(Scene):
     # --- Input ---------------------------------------------------------------
 
     def handle_event(self, event: Event) -> None:  # type: ignore[override]
+        # Justification: Importing here to avoid cyclic import issues.
+        # pylint: disable=import-outside-toplevel
+        from .pong import PongScene
+
+        # pylint: enable=import-outside-toplevel
+
         if event.type == EventType.QUIT:
             logger.info("Menu: Quit event received")
             self.game.quit()
@@ -126,5 +140,24 @@ class MenuScene(Scene):
             text_color = WHITE if selected else DIM
             surface.draw_text(x + 20, y + 10, label, color=text_color)
 
-        draw_button(start_y, "START", selected=(self.selected_index == 0))
-        draw_button(quit_y, "QUIT", selected=(self.selected_index == 1))
+        draw_button(start_y, "START", selected=self.selected_index == 0)
+        draw_button(quit_y, "QUIT", selected=self.selected_index == 1)
+
+    def _title_overlay(self, surface: Backend) -> None:
+        surface.draw_text(
+            self.width // 2 - 80,
+            80,
+            "Deja Bounce",
+            color=WHITE,
+        )
+
+    def _hint_overlay(self, surface: Backend) -> None:
+        surface.draw_text(
+            self.width // 2 - 120,
+            130,
+            "Press ENTER to start · ESC to quit",
+            color=(200, 200, 200),
+        )
+
+
+# pylint: enable=cyclic-import
