@@ -9,17 +9,13 @@ from mini_arcade_core import (
     Event,
     EventType,
     Game,
-    GameConfig,
     Scene,
     SpriteEntity,
-    run_game,
 )
-from mini_arcade_native_backend import NativeBackend
 
-from .ball import Ball
-from .constants import FPS, PADDLE_SIZE, WINDOW_SIZE
-from .paddle import Paddle
-from .utils import logger
+from deja_bounce.constants import PADDLE_SIZE
+from deja_bounce.entities import Ball, Paddle
+from deja_bounce.utils import logger
 
 
 class PongScene(Scene):
@@ -177,21 +173,3 @@ class PongScene(Scene):
         self.ball.y = self.height / 2 - self.ball.height / 2
         self.ball.vx = 250.0 * direction
         self.ball.vy = 200.0
-
-
-def main():
-    """Main entry point for PyPong."""
-    backend = NativeBackend()
-    width, height = WINDOW_SIZE
-    config = GameConfig(
-        width=width,
-        height=height,
-        title="PyPong (Native SDL2 + mini-arcade-core)",
-        fps=FPS,
-        backend=backend,
-    )
-    run_game(PongScene, config=config)
-
-
-if __name__ == "__main__":
-    main()
