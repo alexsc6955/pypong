@@ -1,5 +1,5 @@
 """
-Padde class for PyPong
+Paddle class for DejaBounce
 """
 
 from __future__ import annotations

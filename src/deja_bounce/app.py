@@ -8,13 +8,13 @@ from deja_bounce.scenes import PongScene
 
 
 def main():
-    """Main entry point for PyPong."""
+    """Main entry point for DejaBounce."""
     backend = NativeBackend()
     width, height = WINDOW_SIZE
     config = GameConfig(
         width=width,
         height=height,
-        title="PyPong (Native SDL2 + mini-arcade-core)",
+        title="DejaBounce (Native SDL2 + mini-arcade-core)",
         fps=FPS,
         backend=backend,
     )

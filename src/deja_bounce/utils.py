@@ -1,5 +1,5 @@
 """
-PyPong utils
+DejaBounce utils
 """
 
 import logging
@@ -108,7 +108,7 @@ LOGGER_FORMAT = (
     "%(message)s (%(filename)s:%(lineno)d)"
 )
 logging.basicConfig(level=logging.DEBUG, format=LOGGER_FORMAT)
-logger = logging.getLogger("pypong")
+logger = logging.getLogger("deja-bounce")
 logger.addFilter(EnsureClassName())
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(ConsoleColorFormatter(LOGGER_FORMAT))
