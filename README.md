@@ -1,113 +1,102 @@
-[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url] [![Twitter][twitter-shield]][twitter-url]
+# Deja Bounce
 
-<br>
-<p align="center">
-	<a href="https://github.com/alexsc6955/deja-bounce">
-		<h1 align="center">DejaBounce</h1>
-	</a>
-	<h3 align="center"><b>DejaBounce</b> is a python clone of the classic Atari game, Pong, designed by by Allan Alcorn.</h3>
-	<p align="center">
-    	·
-    	<a href="https://github.com/alexsc6955/deja-bounce/issues">Report Bug</a>
-    	·
-    	<a href="https://github.com/alexsc6955/deja-bounce/issues">Request Feature</a>
-  	</p>
-</p>
+Minimalist, scene-based **Pong-like game with a CPU opponent**, built on top of `mini-arcade-core` and the native SDL2 backend.
 
-<!-- TABLE OF CONTENTS -->
-## Table of Contents
+Deja Bounce is **Milestone 1** of a small game that will later evolve into something weirder (time loops, horror vibes, ARG hooks). For now, it’s a clean, focused Pong implementation that doubles as a **reference game** for the `mini-arcade-core` framework.
 
-* [About the Project](#about-the-project)
-  * [Built With](#built-with)
-* [Getting Started](#getting-started)
-  * [Installation](#installation)
-* [Usage](#usage)
-* [Roadmap](#roadmap)
-* [Contributing](#contributing)
-* [License](#license)
-* [Contact](#contact)
-* [Acknowledgements](#acknowledgements)
+---
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+## Features (Milestone 1 – Solid Pong + CPU)
 
-[![DejaBounce][product-screenshot]](https://example.com)
+- 🎮 **Playable Pong clone**
+  - Two paddles, ball, walls, score.
+  - Simple main menu: `Start Game` → `Quit`.
+- 🧠 **CPU opponent**
+  - CPU paddle tracks the ball with a max speed.
+  - Difficulty controlled by paddle speed and (later) reaction/prediction tweaks.
+- 🧍 vs 🤖 **Game modes**
+  - Player vs CPU.
+  - (Optional) CPU vs CPU “attract mode” – handy for tests / menu idle.
+- ⚙️ **Configurable rules**
+  - First to _N_ points wins (N is configurable).
+  - Win screen with option to restart or go back to menu.
+- 🧱 **Velocity-based movement**
+  - No magic numbers; paddles & ball use velocities.
+  - Classic Pong bounce:
+    - Invert X velocity on paddle / vertical wall collision.
+    - Slight variation based on impact position on the paddle.
 
-### Built With
+---
 
-* [Pygame](https://www.pygame.org/)
+## Tech Stack
 
-## Getting Started
+- **Engine / Core:** [`mini-arcade-core`](https://github.com/your-org/mini-arcade-core)  
+- **Native backend:** `mini-arcade-native-backend` (C++ / SDL2 / pybind11)  
+- **Language:** Python 3.9–3.11  
+- **Build:** PEP 621 `pyproject.toml` + `setuptools`  
+- **CI:** GitHub Actions (lint + tests on 3.9 / 3.10 / 3.11, Slack notifications)
 
-To get the game up and running follow the folowing steps
+---
 
+## Installation
 
-### Installation
-
-**Before installing make sure you have installed Python 3.8.6**
-
-Clone or download this repository, open a terminal and write:
+### 1. Clone the repo
 
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/<your-org>/deja-bounce.git
+cd deja-bounce
 ```
 
-<!-- USAGE EXAMPLES -->
-## Usage
+### 2. Create and activate a virtualenv (recommended)
 
 ```bash
-python3 pong.py
+python -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
 ```
 
-<!-- ROADMAP -->
-## Roadmap
+### 3. Install dependencies
 
-We are working on adding more features to the Game. Follow the repo to keep up with our updates.
+For local development (includes dev tools like pytest, black, etc.):
 
-Feel free to propose features [open issues](https://github.com/alexsc6955/deja-bounce/issues) and also add or see known issues.
+```bash
+pip install --upgrade pip
+pip install -e .[dev]
+```
 
-<!-- CONTRIBUTING -->
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+>Note:
+>``mini-arcade-native-backend`` uses SDL2. If you are installing from source on Linux, you may need the SDL2 development package, e.g.:
+>
+> ```bash
+> pip install --upgrade pip
+> pip install -e .[dev]
+> ```
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Add your changes (`git add .`)
-4. Commit your Changes (`git commit -m "Add some AmazingFeature"`)
-5. Push to the Branch (`git push origin feature/AmazingFeature`)
-6. Open a Pull Request
+If you only want to _play_ (once the project is on PyPI):
 
-<!-- LICENSE -->
-## License
-[MIT](https://github.com/alexsc6955/deja-bounce/blob/master/LICENSE)
+```bash
+pip install deja-bounce
+```
 
-<!-- CONTACT -->
-## Contact
+---
 
-Noel Rodriguez: [@alexsc6955](https://twitter.com/alexsc6955) - alexandersupercraft@unizend.com
+## Running the Game
 
-Project Link: [https://github.com/alexsc6955/deja-bounce](https://github.com/alexsc6955/deja-bounce)
+Once installed, you can run Deja Bounce via the console script:
 
-<!-- ACKNOWLEDGEMENTS -->
-## Acknowledgements
+```bash
+deja-bounce
+```
 
-* [Allan Alcorn](https://twitter.com/alalcorn)
-* [101computing.net](https://www.101computing.net/) [Pong with pygame tutorial](https://www.101computing.net/pong-tutorial-using-pygame-getting-started/)
-* [Othneil Drew](https://github.com/othneildrew)'s [Best README Template](https://github.com/othneildrew/Best-README-Template)
-* [Surjith S M](https://github.com/surjithctly)'s [Documentation HTML template](https://github.com/surjithctly/documentation-html-template)
+Or directly via Python:
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/alexsc6955/deja-bounce.svg?style=flat-square
-[contributors-url]: https://github.com/alexsc6955/deja-bounce/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/alexsc6955/deja-bounce.svg?style=flat-square
-[forks-url]: https://github.com/alexsc6955/deja-bounce/network/members
-[stars-shield]: https://img.shields.io/github/stars/alexsc6955/deja-bounce.svg?style=flat-square
-[stars-url]: https://github.com/alexsc6955/deja-bounce/stargazers
-[issues-shield]: https://img.shields.io/github/issues/alexsc6955/deja-bounce.svg?style=flat-square
-[issues-url]: https://github.com/alexsc6955/deja-bounce/issues
-[license-shield]: https://img.shields.io/github/license/alexsc6955/deja-bounce.svg?style=flat-square
-[license-url]: https://github.com/alexsc6955/deja-bounce/blob/master/LICENSE
-[twitter-shield]: https://img.shields.io/badge/-Twitter-black.svg?style=flat-square&logo=twitter&colorB=555
-[twitter-url]: https://www.twitter.com/alexsc6955/
-<!-- [product-screenshot]: images/screenshot.png -->
+```bash
+python -m deja_bounce.main
+```
+
+Depending on your local setup, there may also be a ``manage.py`` helper:
+
+
+```bash
+python manage.py
+```
