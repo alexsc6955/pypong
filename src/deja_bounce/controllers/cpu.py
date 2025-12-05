@@ -14,8 +14,10 @@ class CpuConfig:
     - dead_zone: how close to the ball center before it stops moving
     """
 
-    max_speed: float = 260.0
-    dead_zone: float = 4.0
+    max_speed: float = 260.0  # slower = easier
+    dead_zone: float = (
+        4.0  # larger dead_zone = CPU "overshoots" less, more human
+    )
 
 
 class CpuPaddleController:
