@@ -13,7 +13,7 @@ from mini_arcade_core import (
     SpriteEntity,
 )
 
-from deja_bounce.constants import PADDLE_SIZE
+from deja_bounce.constants import PADDLE_SIZE, WHITE
 from deja_bounce.controllers import CpuConfig, CpuPaddleController
 from deja_bounce.entities import Ball, Paddle
 from deja_bounce.utils import logger
@@ -78,8 +78,9 @@ class PongScene(Scene):
         if event.type == EventType.KEYDOWN:
             logger.debug(f"Key down: {event.key}")
             if event.key == 27:  # ESC
-                logger.info("ESC pressed, quitting")
-                self.game.quit()
+                from deja_bounce.scenes.menu import MenuScene
+
+                self.game.change_scene(MenuScene(self.game))
                 return
 
             # Left paddle: W / S
@@ -154,8 +155,26 @@ class PongScene(Scene):
         x = self.width // 2 - line_width // 2
         y = 0
         h = self.height
+        surface.draw_rect(x, y, line_width, h, color=WHITE)
 
-        surface.draw_rect(x, y, line_width, h)
+        # Scores near the top, left & right
+        score_y = 20
+
+        # Left score (slightly left of center)
+        surface.draw_text(
+            self.width // 4,
+            score_y,
+            str(self.left_score),
+            color=WHITE,
+        )
+
+        # Right score (slightly right of center)
+        surface.draw_text(
+            self.width * 3 // 4,
+            score_y,
+            str(self.right_score),
+            color=WHITE,
+        )
 
         # Draw all entities
         for ent in self.entities:
