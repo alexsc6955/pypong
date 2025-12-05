@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from mini_arcade_core import Backend, SpriteEntity
 
-from pypong.utils import logger
+from deja_bounce.utils import logger
 
 
 class Paddle(SpriteEntity):
@@ -14,7 +14,9 @@ class Paddle(SpriteEntity):
     Paddle entity using mini-arcade-core's SpriteEntity.
     """
 
-    def __init__(self, x: float, y: float, width: int, height: int, window_height: int):
+    def __init__(
+        self, x: float, y: float, width: int, height: int, window_height: int
+    ):
         super().__init__(x=x, y=y, width=width, height=height)
         self.window_height = window_height
         self.speed = 300.0

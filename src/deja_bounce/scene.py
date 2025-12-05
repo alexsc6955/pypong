@@ -1,3 +1,7 @@
+"""
+Minimal Pong-like scene using mini-arcade-core.
+"""
+
 from __future__ import annotations
 
 from mini_arcade_core import (
@@ -18,7 +22,7 @@ from .paddle import Paddle
 from .utils import logger
 
 
-class EmptyScene(Scene):
+class PongScene(Scene):
     """
     Minimal scene: opens a window, clears screen, handles quit/ESC.
     """
@@ -129,7 +133,9 @@ class EmptyScene(Scene):
         # Scoring – ball leaves left/right
         if self.ball.x < 0:
             self.right_score += 1
-            logger.info(f"Right scores! {self.left_score} - {self.right_score}")
+            logger.info(
+                f"Right scores! {self.left_score} - {self.right_score}"
+            )
             self._reset_ball(direction=1)
 
         if self.ball.x > self.width:
@@ -184,7 +190,7 @@ def main():
         fps=FPS,
         backend=backend,
     )
-    run_game(EmptyScene, config=config)
+    run_game(PongScene, config=config)
 
 
 if __name__ == "__main__":

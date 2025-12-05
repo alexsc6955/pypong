@@ -97,7 +97,9 @@ class ConsoleColorFormatter(logging.Formatter):
             record.levelno, ConsoleColorFormatter.COLORS["RESET"]
         )
         formatted_record = super().format(record)
-        return f"{color}{formatted_record}{ConsoleColorFormatter.COLORS['RESET']}"
+        return (
+            f"{color}{formatted_record}{ConsoleColorFormatter.COLORS['RESET']}"
+        )
 
 
 LOGGER_FORMAT = (

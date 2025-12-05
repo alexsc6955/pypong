@@ -2,15 +2,15 @@
 
 <br>
 <p align="center">
-	<a href="https://github.com/alexsc6955/pypong">
-		<h1 align="center">PyPong</h1>
+	<a href="https://github.com/alexsc6955/deja-bounce">
+		<h1 align="center">DejaBounce</h1>
 	</a>
-	<h3 align="center"><b>PyPong</b> is a python clone of the classic Atari game, Pong, designed by by Allan Alcorn.</h3>
+	<h3 align="center"><b>DejaBounce</b> is a python clone of the classic Atari game, Pong, designed by by Allan Alcorn.</h3>
 	<p align="center">
     	·
-    	<a href="https://github.com/alexsc6955/pypong/issues">Report Bug</a>
+    	<a href="https://github.com/alexsc6955/deja-bounce/issues">Report Bug</a>
     	·
-    	<a href="https://github.com/alexsc6955/pypong/issues">Request Feature</a>
+    	<a href="https://github.com/alexsc6955/deja-bounce/issues">Request Feature</a>
   	</p>
 </p>
 
@@ -31,7 +31,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![PyPong][product-screenshot]](https://example.com)
+[![DejaBounce][product-screenshot]](https://example.com)
 
 ### Built With
 
@@ -64,7 +64,7 @@ python3 pong.py
 
 We are working on adding more features to the Game. Follow the repo to keep up with our updates.
 
-Feel free to propose features [open issues](https://github.com/alexsc6955/pypong/issues) and also add or see known issues.
+Feel free to propose features [open issues](https://github.com/alexsc6955/deja-bounce/issues) and also add or see known issues.
 
 <!-- CONTRIBUTING -->
 ## Contributing
@@ -79,14 +79,14 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 <!-- LICENSE -->
 ## License
-[MIT](https://github.com/alexsc6955/pypong/blob/master/LICENSE)
+[MIT](https://github.com/alexsc6955/deja-bounce/blob/master/LICENSE)
 
 <!-- CONTACT -->
 ## Contact
 
 Noel Rodriguez: [@alexsc6955](https://twitter.com/alexsc6955) - alexandersupercraft@unizend.com
 
-Project Link: [https://github.com/alexsc6955/pypong](https://github.com/alexsc6955/pypong)
+Project Link: [https://github.com/alexsc6955/deja-bounce](https://github.com/alexsc6955/deja-bounce)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
@@ -98,16 +98,16 @@ Project Link: [https://github.com/alexsc6955/pypong](https://github.com/alexsc69
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/alexsc6955/pypong.svg?style=flat-square
-[contributors-url]: https://github.com/alexsc6955/pypong/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/alexsc6955/pypong.svg?style=flat-square
-[forks-url]: https://github.com/alexsc6955/pypong/network/members
-[stars-shield]: https://img.shields.io/github/stars/alexsc6955/pypong.svg?style=flat-square
-[stars-url]: https://github.com/alexsc6955/pypong/stargazers
-[issues-shield]: https://img.shields.io/github/issues/alexsc6955/pypong.svg?style=flat-square
-[issues-url]: https://github.com/alexsc6955/pypong/issues
-[license-shield]: https://img.shields.io/github/license/alexsc6955/pypong.svg?style=flat-square
-[license-url]: https://github.com/alexsc6955/pypong/blob/master/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/alexsc6955/deja-bounce.svg?style=flat-square
+[contributors-url]: https://github.com/alexsc6955/deja-bounce/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/alexsc6955/deja-bounce.svg?style=flat-square
+[forks-url]: https://github.com/alexsc6955/deja-bounce/network/members
+[stars-shield]: https://img.shields.io/github/stars/alexsc6955/deja-bounce.svg?style=flat-square
+[stars-url]: https://github.com/alexsc6955/deja-bounce/stargazers
+[issues-shield]: https://img.shields.io/github/issues/alexsc6955/deja-bounce.svg?style=flat-square
+[issues-url]: https://github.com/alexsc6955/deja-bounce/issues
+[license-shield]: https://img.shields.io/github/license/alexsc6955/deja-bounce.svg?style=flat-square
+[license-url]: https://github.com/alexsc6955/deja-bounce/blob/master/LICENSE
 [twitter-shield]: https://img.shields.io/badge/-Twitter-black.svg?style=flat-square&logo=twitter&colorB=555
 [twitter-url]: https://www.twitter.com/alexsc6955/
 <!-- [product-screenshot]: images/screenshot.png -->

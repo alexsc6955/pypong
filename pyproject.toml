@@ -1,0 +1,69 @@
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "deja-bounce"
+version = "0.1.0"
+description = "A minimalist Pong-like game with CPU opponent, built on mini-arcade-core"
+authors = [{ name = "Santiago Rincon", email = "rincores@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.9,<3.12"
+license = { file = "LICENSE" }
+dependencies = [
+  "mini-arcade-core>=0.6.1",
+  "mini-arcade-native-backend>=0.2.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest~=8.3",
+  "pytest-cov~=6.0",
+  "black~=24.10",
+  "isort~=5.13",
+  "mypy~=1.5",
+  "pylint~=3.3",
+]
+
+[tool.black]
+line-length = 79
+target-version = ["py39"]
+extend-exclude = '''/(
+    docs
+  | tests
+)/'''
+
+[tool.isort]
+profile = "black"
+line_length = 79
+known_first_party = ["deja_bounce"]
+skip = [".venv", "venv", "env", "build", "dist", "docs", "tests"]
+
+[tool.mypy]
+python_version = "3.9"
+packages = ["deja_bounce"]
+ignore_missing_imports = true
+strict = false
+
+[tool.pylint.messages_control]
+disable = [
+  "too-few-public-methods",
+  "fixme",
+]
+
+[tool.pylint.MAIN]
+ignore-paths = [
+  "^\\.venv",
+  "^venv",
+  "^tests",
+  "^env",
+  "^build",
+  "^dist",
+  "^docs",
+]
+
+[tool.poetry]
+packages = [{ include = "deja_bounce", from = "src" }]
+
+[project.scripts]
+deja-bounce = "deja_bounce.main:run"
