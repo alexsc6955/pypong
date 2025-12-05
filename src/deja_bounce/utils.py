@@ -1,5 +1,5 @@
 """
-PyPong utils
+DejaBounce utils
 """
 
 import logging
@@ -33,7 +33,10 @@ class EnsureClassName(logging.Filter):
         target_func = record.funcName  # function name that logged
 
         # Walk current stack; stop when we match the record’s file+func.
+        # Justification: Accessing protected member for logging purposes.
+        # pylint: disable=protected-access
         f = sys._getframe()
+        # pylint: enable=protected-access
         for _ in range(200):  # safety cap
             if f is None:
                 break
@@ -108,7 +111,7 @@ LOGGER_FORMAT = (
     "%(message)s (%(filename)s:%(lineno)d)"
 )
 logging.basicConfig(level=logging.DEBUG, format=LOGGER_FORMAT)
-logger = logging.getLogger("pypong")
+logger = logging.getLogger("deja-bounce")
 logger.addFilter(EnsureClassName())
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(ConsoleColorFormatter(LOGGER_FORMAT))

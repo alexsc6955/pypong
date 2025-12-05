@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from mini_arcade_core import Backend, SpriteEntity
 
-from .utils import logger
+from deja_bounce.utils import logger
 
 
 class Ball(SpriteEntity):

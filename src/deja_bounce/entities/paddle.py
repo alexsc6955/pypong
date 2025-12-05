@@ -1,5 +1,5 @@
 """
-Padde class for PyPong
+Paddle class for DejaBounce
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ class Paddle(SpriteEntity):
     Paddle entity using mini-arcade-core's SpriteEntity.
     """
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(
         self, x: float, y: float, width: int, height: int, window_height: int
     ):
@@ -22,18 +23,24 @@ class Paddle(SpriteEntity):
         self.speed = 300.0
         self.moving_up = False
         self.moving_down = False
+        self.vy = 0.0
 
         logger.info("Paddle created")
 
     def update(self, dt: float) -> None:  # override Entity.update
+        # compute instantaneous vertical velocity based on input flags
+        vy = 0.0
         if self.moving_up:
-            self.y -= self.speed * dt
-        if self.moving_down:
-            self.y += self.speed * dt
+            vy = -self.speed
+        elif self.moving_down:
+            vy = self.speed
+
+        # apply movement
+        self.y += vy * dt
+        self.vy = vy  # <--- store for inertia
 
         # Clamp inside window
-        if self.y < 0:
-            self.y = 0
+        self.y = max(self.y, 0)
         if self.y + self.height > self.window_height:
             self.y = self.window_height - self.height
 
