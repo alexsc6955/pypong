@@ -22,14 +22,21 @@ class Paddle(SpriteEntity):
         self.speed = 300.0
         self.moving_up = False
         self.moving_down = False
+        self.vy = 0.0
 
         logger.info("Paddle created")
 
     def update(self, dt: float) -> None:  # override Entity.update
+        # compute instantaneous vertical velocity based on input flags
+        vy = 0.0
         if self.moving_up:
-            self.y -= self.speed * dt
-        if self.moving_down:
-            self.y += self.speed * dt
+            vy = -self.speed
+        elif self.moving_down:
+            vy = self.speed
+
+        # apply movement
+        self.y += vy * dt
+        self.vy = vy  # <--- store for inertia
 
         # Clamp inside window
         if self.y < 0:

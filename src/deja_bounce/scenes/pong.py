@@ -114,12 +114,22 @@ class PongScene(Scene):
 
         # Paddle collisions
         if self._intersects(self.ball, self.left):
+            # snap ball outside the paddle so we don't keep intersecting
             self.ball.x = self.left.x + self.left.width
-            self.ball.vx *= -1
+
+            # ensure it goes to the right
+            self.ball.vx = abs(self.ball.vx)
+
+            # apply angle + inertia
+            self._apply_paddle_influence(self.left)
 
         if self._intersects(self.ball, self.right):
             self.ball.x = self.right.x - self.ball.width
-            self.ball.vx *= -1
+
+            # ensure it goes to the left
+            self.ball.vx = -abs(self.ball.vx)
+
+            self._apply_paddle_influence(self.right)
 
         # Scoring – ball leaves left/right
         if self.ball.x < 0:
@@ -168,3 +178,41 @@ class PongScene(Scene):
         self.ball.y = self.height / 2 - self.ball.height / 2
         self.ball.vx = 250.0 * direction
         self.ball.vy = 200.0
+
+    def _apply_paddle_influence(self, paddle: Paddle) -> None:
+        """
+        Adjust ball trajectory based on:
+        - where it hit on the paddle (top/middle/bottom)
+        - paddle vertical velocity (inertia)
+        """
+        # 1) Position-based angle
+        ball_center = self.ball.y + self.ball.height / 2
+        paddle_center = paddle.y + paddle.height / 2
+        offset = (
+            ball_center - paddle_center
+        )  # >0 = lower half, <0 = upper half
+
+        # normalize offset to [-1, 1]
+        if paddle.height > 0:
+            norm = offset / (paddle.height / 2)
+        else:
+            norm = 0.0
+        norm = max(-1.0, min(1.0, norm))
+
+        BASE_VY = 220.0  # base vertical speed from angle
+        INERTIA_FACTOR = 0.3  # how much paddle.vy affects ball.vy
+        MAX_VY = 400.0  # safety clamp
+
+        # angle component + inertia from paddle velocity
+        new_vy = norm * BASE_VY + paddle.vy * INERTIA_FACTOR
+
+        # optional clamp so it doesn't go crazy fast
+        if new_vy > MAX_VY:
+            new_vy = MAX_VY
+        elif new_vy < -MAX_VY:
+            new_vy = -MAX_VY
+
+        self.ball.vy = new_vy
+
+        # (optional) tiny speed-up on each hit to make rallies more intense
+        self.ball.vx *= 1.03
