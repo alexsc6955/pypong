@@ -67,7 +67,7 @@ class PongScene(Scene):
         cpu_cfg = CpuConfig(max_speed=260.0, dead_zone=4.0)
         self.cpu = CpuPaddleController(self.right, self.ball, config=cpu_cfg)
 
-        self.trail_enabled = True
+        self.trail_enabled = False
         self.trail = deque(maxlen=15)
 
         self.photo_mode = False
