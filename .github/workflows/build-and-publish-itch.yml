@@ -309,7 +309,7 @@ jobs:
         shell: bash
         run: |
           curl -L -o butler.zip https://broth.itch.zone/butler/windows-amd64/LATEST/archive/default
-          tar -xf butler.zip
+          unzip butler.zip
 
       - name: Publish to itch.io with butler
         env:
