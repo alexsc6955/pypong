@@ -15,7 +15,10 @@ from mini_arcade_core import (
     Event,
     EventType,
     Game,
+    KinematicData,
+    Position2D,
     Scene,
+    Size2D,
     SpriteEntity,
 )
 
@@ -37,27 +40,33 @@ class PongScene(Scene):
         self.height = game.config.height
         pad_w, pad_h = PADDLE_SIZE
 
+        left_position = Position2D(20, self.height / 2 - pad_h / 2)
+        left_size = Size2D(pad_w, pad_h)
         self.left = Paddle(
-            x=20,
-            y=self.height / 2 - pad_h / 2,
-            width=pad_w,
-            height=pad_h,
-            window_height=self.height,
-        )
-        self.right = Paddle(
-            x=self.width - 20 - pad_w,
-            y=self.height / 2 - pad_h / 2,
-            width=pad_w,
-            height=pad_h,
+            left_position,
+            left_size,
             window_height=self.height,
         )
 
-        self.ball = Ball(
+        right_position = Position2D(
+            self.width - 20 - pad_w, self.height / 2 - pad_h / 2
+        )
+        right_size = Size2D(pad_w, pad_h)
+        self.right = Paddle(
+            right_position,
+            right_size,
+            window_height=self.height,
+        )
+
+        ball_data = KinematicData.rect(
             x=self.width / 2 - 5,
             y=self.height / 2 - 5,
             width=10,
             height=10,
+            vx=250.0,
+            vy=200.0,
         )
+        self.ball = Ball(ball_data)
 
         self.entities: list[SpriteEntity] = [self.left, self.right, self.ball]
 

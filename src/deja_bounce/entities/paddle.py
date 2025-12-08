@@ -4,7 +4,7 @@ Paddle class for DejaBounce
 
 from __future__ import annotations
 
-from mini_arcade_core import Backend, SpriteEntity
+from mini_arcade_core import Backend, SpriteEntity, Size2D, Position2D
 
 from deja_bounce.utils import logger
 
@@ -15,10 +15,8 @@ class Paddle(SpriteEntity):
     """
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
-    def __init__(
-        self, x: float, y: float, width: int, height: int, window_height: int
-    ):
-        super().__init__(x=x, y=y, width=width, height=height)
+    def __init__(self, position: Position2D, size: Size2D, window_height: int):
+        super().__init__(position, size)
         self.window_height = window_height
         self.speed = 300.0
         self.moving_up = False
