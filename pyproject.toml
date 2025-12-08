@@ -65,6 +65,10 @@ ignore-paths = [
 
 [tool.poetry]
 packages = [{ include = "deja_bounce", from = "src" }]
+include = [
+  { path = "assets", format = "sdist" },
+  { path = "assets", format = "wheel" },
+]
 
 [project.scripts]
-deja-bounce = "deja_bounce.main:run"
+deja-bounce = "deja_bounce.app:main"
