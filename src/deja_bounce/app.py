@@ -7,13 +7,13 @@ from __future__ import annotations
 from mini_arcade_core import GameConfig, run_game
 from mini_arcade_native_backend import NativeBackend
 
-from deja_bounce.constants import FPS, ROOT, WINDOW_SIZE
+from deja_bounce.constants import ASSETS_ROOT, FPS, WINDOW_SIZE
 from deja_bounce.scenes import MenuScene
 
 
-def main():
+def run():
     """Main entry point for DejaBounce."""
-    font_path = ROOT / "assets" / "fonts" / "deja_vu_dive" / "Deja-vu_dive.ttf"
+    font_path = ASSETS_ROOT / "fonts" / "deja_vu_dive" / "Deja-vu_dive.ttf"
 
     backend = NativeBackend(font_path=str(font_path), font_size=24)
     width, height = WINDOW_SIZE
@@ -28,4 +28,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run()
