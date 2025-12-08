@@ -306,10 +306,10 @@ jobs:
           path: "${{ env.GAME_NAME }}-v${{ needs.bump-and-tag.outputs.version }}-windows.zip"
 
       - name: Download butler
+        shell: bash
         run: |
           curl -L -o butler.zip https://broth.itch.zone/butler/windows-amd64/LATEST/archive/default
           tar -xf butler.zip
-        shell: powershell
 
       - name: Publish to itch.io with butler
         env:
