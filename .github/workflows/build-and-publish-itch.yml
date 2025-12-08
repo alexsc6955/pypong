@@ -284,13 +284,7 @@ jobs:
           pip install pyinstaller
 
       - name: Build Windows EXE with PyInstaller
-        run: |
-          pyinstaller ^
-            --onefile ^
-            --name $env:GAME_NAME ^
-            --collect-all mini_arcade_native_backend ^
-            --add-data "assets;assets" ^
-            src\deja_bounce\__main__.py
+        run: pyinstaller --onefile --name "$env:GAME_NAME" --collect-all mini_arcade_native_backend --add-data "assets;assets" src\deja_bounce\__main__.py
 
       - name: Package build as ZIP
         run: |
