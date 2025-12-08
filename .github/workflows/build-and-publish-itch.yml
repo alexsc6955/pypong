@@ -307,9 +307,7 @@ jobs:
 
       - name: Download butler
         run: |
-          Invoke-WebRequest `
-            -Uri "https://broth.itch.ovh/butler/windows-amd64/LATEST/archive/default" `
-            -OutFile "butler.zip"
+          curl -L -o butler.zip https://broth.itch.zone/butler/windows-amd64/LATEST/archive/default
           tar -xf butler.zip
         shell: powershell
 

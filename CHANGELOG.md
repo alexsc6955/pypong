@@ -24,6 +24,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - restructure game architecture by removing old classes and implementing a new scene-based approach with updated ball and paddle entities
 
 ### Other
+- Merge branch 'release/1.0' of github.com:alexsc6955/deja-bounce into release/1.0
+- Merge branch 'release/1.0' of github.com:alexsc6955/deja-bounce into release/1.0
 - Merge release/0.2 into develop
 - Add MenuScene for Deja Bounce main menu with navigation and options
 - docs: Revise README to enhance project description, features, and installation instructions
@@ -43,4 +45,3 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Merge pull request #1 from alexsc6955/paddles
 - Paddles added
 - initial commit
-
