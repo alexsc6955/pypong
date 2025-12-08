@@ -71,4 +71,4 @@ include = [
 ]
 
 [project.scripts]
-deja-bounce = "deja_bounce.app:main"
+deja-bounce = "deja_bounce.app:run"
