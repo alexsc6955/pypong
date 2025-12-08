@@ -242,7 +242,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "chore: release ${VERSION_TO_TAG}"
             git push origin "${{ inputs.release_branch }}"
-          else
+          else:
             echo "No changes to commit."
           fi
 
@@ -283,21 +283,29 @@ jobs:
           pip install .
           pip install pyinstaller
 
+      # NOTE: onedir build (better for Defender + easier to debug)
       - name: Build Windows EXE with PyInstaller
-        run: pyinstaller --onefile --name "$env:GAME_NAME" --collect-all mini_arcade_native_backend --add-data "assets;assets" src\deja_bounce\__main__.py
+        run: pyinstaller --onedir --name "$env:GAME_NAME" --add-data "assets;assets" src\deja_bounce\__main__.py
 
       - name: Package build as ZIP
         run: |
-          mkdir artifact
-          copy $env:BUILD_DIR\$env:GAME_NAME.exe artifact\
-          if (Test-Path README.md) { copy README.md artifact\ }
-          if (Test-Path LICENSE) { copy LICENSE artifact\ }
-
           $version = "${{ needs.bump-and-tag.outputs.version }}"
           $zipName = "$($env:GAME_NAME)-v$version-windows.zip"
 
+          # Staging folder for packaging
+          if (Test-Path package) { Remove-Item package -Recurse -Force }
+          New-Item -ItemType Directory -Path package | Out-Null
+
+          # Copy built game folder (dist/DejaBounce/...)
+          Copy-Item "$env:BUILD_DIR\$env:GAME_NAME\*" "package\" -Recurse
+
+          # Optionally include README / LICENSE
+          if (Test-Path README.md) { Copy-Item README.md package\ }
+          if (Test-Path LICENSE) { Copy-Item LICENSE package\ }
+
           Write-Host "Creating ZIP: $zipName"
-          Compress-Archive artifact "$zipName"
+          if (Test-Path $zipName) { Remove-Item $zipName -Force }
+          Compress-Archive -Path "package\*" -DestinationPath $zipName
 
       - name: Upload build artifact (for manual download / backup)
         uses: actions/upload-artifact@v4
