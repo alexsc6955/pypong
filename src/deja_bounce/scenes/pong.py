@@ -168,26 +168,18 @@ class PongScene(Scene):
             self.ball.velocity.vy *= -1
 
         # Paddle collisions
-        if self._intersects(self.ball, self.left_paddle):
-            # snap ball outside the paddle so we don't keep intersecting
+        if self.ball.collider.intersects(self.left_paddle.collider):
             self.ball.position.x = (
                 self.left_paddle.position.x + self.left_paddle.size.width
             )
-
-            # ensure it goes to the right
             self.ball.velocity.vx = abs(self.ball.velocity.vx)
-
-            # apply angle + inertia
             self._apply_paddle_influence(self.left_paddle)
 
-        if self._intersects(self.ball, self.right_paddle):
+        if self.ball.collider.intersects(self.right_paddle.collider):
             self.ball.position.x = (
                 self.right_paddle.position.x - self.ball.size.width
             )
-
-            # ensure it goes to the left
             self.ball.velocity.vx = -abs(self.ball.velocity.vx)
-
             self._apply_paddle_influence(self.right_paddle)
 
         # Scoring – ball leaves left/right
