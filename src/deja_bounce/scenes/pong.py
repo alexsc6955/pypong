@@ -12,6 +12,7 @@ from collections import deque
 
 from mini_arcade_core import (
     Backend,
+    Bounds2D,
     Event,
     EventType,
     Game,
@@ -19,6 +20,7 @@ from mini_arcade_core import (
     Position2D,
     Scene,
     Size2D,
+    VerticalBounce,
 )
 
 from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
@@ -39,6 +41,9 @@ class PongScene(Scene):
 
     def __init__(self, game: Game):
         super().__init__(game)
+
+        self.bounds = Bounds2D.from_size(self.size)
+        self.ball_vertical_bounds = VerticalBounce(self.bounds)
 
         self._set_entities()
 
@@ -155,17 +160,10 @@ class PongScene(Scene):
         Update game logic. (None yet.)
         """
         self.update_entities(dt)
-
         self.cpu.update(dt)
 
         # Top/bottom bounce
-        if self.ball.position.y <= 0:
-            self.ball.position.y = 0
-            self.ball.velocity.vy *= -1
-
-        if self.ball.position.y + self.ball.size.height >= self.size.height:
-            self.ball.position.y = self.size.height - self.ball.size.height
-            self.ball.velocity.vy *= -1
+        self.ball_vertical_bounds.apply(self.ball)
 
         # Paddle collisions
         if self.ball.collider.intersects(self.left_paddle.collider):
