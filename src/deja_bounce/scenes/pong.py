@@ -248,15 +248,6 @@ class PongScene(Scene):
         self.draw_entities(surface)
         self.draw_overlays(surface)
 
-    @staticmethod
-    def _intersects(ball: Ball, paddle: Paddle) -> bool:
-        return not (
-            ball.position.x + ball.size.width < paddle.position.x
-            or ball.position.x > paddle.position.x + paddle.size.width
-            or ball.position.y + ball.size.height < paddle.position.y
-            or ball.position.y > paddle.position.y + paddle.size.height
-        )
-
     def _reset_ball(self, direction: int):
         """
         Reset ball to center, heading left (-1) or right (+1).
