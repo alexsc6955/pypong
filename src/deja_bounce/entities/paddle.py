@@ -6,7 +6,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from mini_arcade_core import Backend, Position2D, Size2D, SpriteEntity
+from mini_arcade_core import (
+    Backend,
+    KinematicData,
+    KinematicEntity,
+    Position2D,
+    Size2D,
+    SpriteEntity,
+)
 
 from deja_bounce.utils import logger
 
@@ -23,14 +30,22 @@ class PaddleConfig:
     speed: float = 300.0
 
 
-class Paddle(SpriteEntity):
+class Paddle(KinematicEntity):
     """
     Paddle entity using mini-arcade-core's SpriteEntity.
     """
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(self, config: PaddleConfig):
-        super().__init__(config.position, config.size)
+        data = KinematicData.rect(
+            x=config.position.x,
+            y=config.position.y,
+            width=config.size.width,
+            height=config.size.height,
+            vx=0.0,
+            vy=0.0,
+        )
+        super().__init__(data)
         self.window_height = config.window_height
         self.speed = config.speed
         self.moving_up = False
@@ -40,21 +55,28 @@ class Paddle(SpriteEntity):
         logger.info("Paddle created")
 
     def update(self, dt: float) -> None:  # override Entity.update
-        # compute instantaneous vertical velocity based on input flags
-        vy = 0.0
+        # Configure vertical velocity from input flags
         if self.moving_up:
-            vy = -self.speed
+            self.velocity.move_up(self.speed)
         elif self.moving_down:
-            vy = self.speed
+            self.velocity.move_down(self.speed)
+        else:
+            self.velocity.stop_y()
 
-        # apply movement
-        self.position.y += vy * dt
-        self.vy = vy  # <--- store for inertia
+        # Apply velocity to position (uses Velocity2D.advance under the hood)
+        super().update(dt)
 
-        # Clamp inside window
-        self.position.y = max(self.position.y, 0)
+        # Expose current vy for the paddle influence logic
+        self.vy = self.velocity.vy
+
+        # Clamp inside window and kill velocity if we hit borders
+        if self.position.y < 0:
+            self.position.y = 0
+            self.velocity.stop_y()
+
         if self.position.y + self.size.height > self.window_height:
             self.position.y = self.window_height - self.size.height
+            self.velocity.stop_y()
 
     def draw(self, surface: Backend) -> None:  # override Entity.draw
         surface.draw_rect(
