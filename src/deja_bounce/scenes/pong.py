@@ -19,7 +19,6 @@ from mini_arcade_core import (
     Position2D,
     Scene,
     Size2D,
-    SpriteEntity,
 )
 
 from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
