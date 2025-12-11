@@ -23,7 +23,7 @@ from mini_arcade_core import (
 
 from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
 from deja_bounce.controllers import CpuConfig, CpuPaddleController
-from deja_bounce.entities import Ball, Paddle
+from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
 
 
@@ -33,51 +33,66 @@ class PongScene(Scene):
     Minimal scene: opens a window, clears screen, handles quit/ESC.
     """
 
+    right_paddle: Paddle
+    left_paddle: Paddle
+    ball: Ball
+
     def __init__(self, game: Game):
         super().__init__(game)
-        pad_w, pad_h = PADDLE_SIZE
 
-        left_position = Position2D(20, self.size.height / 2 - pad_h / 2)
-        left_size = Size2D(pad_w, pad_h)
-        self.left = Paddle(
-            left_position,
-            left_size,
-            window_height=self.size.height,
-        )
-
-        right_position = Position2D(
-            self.size.width - 20 - pad_w, self.size.height / 2 - pad_h / 2
-        )
-        right_size = Size2D(pad_w, pad_h)
-        self.right = Paddle(
-            right_position,
-            right_size,
-            window_height=self.size.height,
-        )
-
-        ball_data = KinematicData.rect(
-            x=self.size.width / 2 - 5,
-            y=self.size.height / 2 - 5,
-            width=10,
-            height=10,
-            vx=250.0,
-            vy=200.0,
-        )
-        self.ball = Ball(ball_data)
-
-        self.entities = [self.left, self.right, self.ball]
+        self._set_entities()
 
         self.left_score = 0
         self.right_score = 0
 
         cpu_cfg = CpuConfig(max_speed=260.0, dead_zone=4.0)
-        self.cpu = CpuPaddleController(self.right, self.ball, config=cpu_cfg)
+        self.cpu = CpuPaddleController(
+            self.right_paddle, self.ball, config=cpu_cfg
+        )
 
         self.trail_enabled = False
         self.trail = deque(maxlen=15)
 
         self.photo_mode = False
         self.add_overlay(self._photo_overlay)
+
+    def _set_entities(self):
+        pad_w, pad_h = PADDLE_SIZE
+
+        # Left paddle
+        self.left_paddle = Paddle(
+            PaddleConfig(
+                position=Position2D(20, self.size.height / 2 - pad_h / 2),
+                size=Size2D(pad_w, pad_h),
+                window_height=self.size.height,
+            )
+        )
+
+        # Right paddle
+        self.right_paddle = Paddle(
+            PaddleConfig(
+                position=Position2D(
+                    self.size.width - 20 - pad_w,
+                    self.size.height / 2 - pad_h / 2,
+                ),
+                size=Size2D(pad_w, pad_h),
+                window_height=self.size.height,
+            )
+        )
+
+        # Ball
+        self.ball = Ball(
+            KinematicData.rect(
+                x=self.size.width / 2 - 5,
+                y=self.size.height / 2 - 5,
+                width=10,
+                height=10,
+                vx=250.0,
+                vy=200.0,
+            )
+        )
+
+        self.add_entity(self.left_paddle, self.right_paddle, self.ball)
 
     def on_enter(self):
         logger.info("PongScene on_enter")
@@ -125,22 +140,21 @@ class PongScene(Scene):
 
             # Left paddle: W / S
             if event.key == ord("w"):
-                self.left.moving_up = True
+                self.left_paddle.moving_up = True
             if event.key == ord("s"):
-                self.left.moving_down = True
+                self.left_paddle.moving_down = True
 
         elif event.type == EventType.KEYUP:
             if event.key == ord("w"):
-                self.left.moving_up = False
+                self.left_paddle.moving_up = False
             if event.key == ord("s"):
-                self.left.moving_down = False
+                self.left_paddle.moving_down = False
 
     def update(self, dt: float):
         """
         Update game logic. (None yet.)
         """
-        for ent in self.entities:
-            ent.update(dt)
+        self.update_entities(dt)
 
         self.cpu.update(dt)
 
@@ -154,23 +168,27 @@ class PongScene(Scene):
             self.ball.velocity.vy *= -1
 
         # Paddle collisions
-        if self._intersects(self.ball, self.left):
+        if self._intersects(self.ball, self.left_paddle):
             # snap ball outside the paddle so we don't keep intersecting
-            self.ball.position.x = self.left.position.x + self.left.size.width
+            self.ball.position.x = (
+                self.left_paddle.position.x + self.left_paddle.size.width
+            )
 
             # ensure it goes to the right
             self.ball.velocity.vx = abs(self.ball.velocity.vx)
 
             # apply angle + inertia
-            self._apply_paddle_influence(self.left)
+            self._apply_paddle_influence(self.left_paddle)
 
-        if self._intersects(self.ball, self.right):
-            self.ball.position.x = self.right.position.x - self.ball.size.width
+        if self._intersects(self.ball, self.right_paddle):
+            self.ball.position.x = (
+                self.right_paddle.position.x - self.ball.size.width
+            )
 
             # ensure it goes to the left
             self.ball.velocity.vx = -abs(self.ball.velocity.vx)
 
-            self._apply_paddle_influence(self.right)
+            self._apply_paddle_influence(self.right_paddle)
 
         # Scoring – ball leaves left/right
         if self.ball.position.x < 0:
@@ -235,10 +253,7 @@ class PongScene(Scene):
                     (255, 255, 255, alpha),  # RGBA
                 )
 
-        # Draw all entities
-        for ent in self.entities:
-            ent.draw(surface)
-
+        self.draw_entities(surface)
         self.draw_overlays(surface)
 
     @staticmethod
