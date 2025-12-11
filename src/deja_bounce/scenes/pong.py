@@ -172,7 +172,6 @@ class PongScene(Scene):
             )
             self.ball.velocity.vx = abs(self.ball.velocity.vx)
             self._apply_paddle_influence(self.left_paddle)
-
         if self.ball.collider.intersects(self.right_paddle.collider):
             self.ball.position.x = (
                 self.right_paddle.position.x - self.ball.size.width
@@ -187,7 +186,6 @@ class PongScene(Scene):
                 f"Right scores! {self.left_score} - {self.right_score}"
             )
             self._reset_ball(direction=1)
-
         if self.ball.position.x > self.size.width:
             self.left_score += 1
             logger.info(f"Left scores! {self.left_score} - {self.right_score}")
