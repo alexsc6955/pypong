@@ -4,7 +4,7 @@ This module defines the Ball class.
 
 from __future__ import annotations
 
-from mini_arcade_core import Backend, KinematicEntity, KinematicData
+from mini_arcade_core import Backend, KinematicData, KinematicEntity
 
 from deja_bounce.utils import logger
 
@@ -20,4 +20,9 @@ class Ball(KinematicEntity):
         logger.info("Ball created")
 
     def draw(self, surface: Backend) -> None:
-        surface.draw_rect(int(self.x), int(self.y), self.width, self.height)
+        surface.draw_rect(
+            int(self.position.x),
+            int(self.position.y),
+            self.size.width,
+            self.size.height,
+        )

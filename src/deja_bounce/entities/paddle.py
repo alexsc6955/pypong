@@ -34,13 +34,18 @@ class Paddle(SpriteEntity):
             vy = self.speed
 
         # apply movement
-        self.y += vy * dt
+        self.position.y += vy * dt
         self.vy = vy  # <--- store for inertia
 
         # Clamp inside window
-        self.y = max(self.y, 0)
-        if self.y + self.height > self.window_height:
-            self.y = self.window_height - self.height
+        self.position.y = max(self.position.y, 0)
+        if self.position.y + self.size.height > self.window_height:
+            self.position.y = self.window_height - self.size.height
 
     def draw(self, surface: Backend) -> None:  # override Entity.draw
-        surface.draw_rect(int(self.x), int(self.y), self.width, self.height)
+        surface.draw_rect(
+            int(self.position.x),
+            int(self.position.y),
+            self.size.width,
+            self.size.height,
+        )

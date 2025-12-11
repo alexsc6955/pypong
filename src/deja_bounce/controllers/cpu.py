@@ -67,13 +67,15 @@ class CpuPaddleController:
         :type dt: float
         """
         # 1) If ball is moving LEFT, we don't care (we're on the right side)
-        if self.ball.vx <= 0:
+        if self.ball.velocity.vx <= 0:
             self._stop()
             return
 
         # 2) If ball is too far from us in X, chill
         #    (assumes CPU paddle is on the right)
-        distance_x = self.paddle.x - (self.ball.x + self.ball.width)
+        distance_x = self.paddle.position.x - (
+            self.ball.position.x + self.ball.size.width
+        )
         if distance_x > self.config.reaction_distance:
             self._stop()
             return
@@ -85,8 +87,12 @@ class CpuPaddleController:
 
         # 3) Decide where to aim:
         #    ball center + some vertical error
-        ball_center = self.ball.y + self.ball.height / 2 + self._aim_offset_y
-        paddle_center = self.paddle.y + self.paddle.height / 2
+        ball_center = (
+            self.ball.position.y
+            + self.ball.size.height / 2
+            + self._aim_offset_y
+        )
+        paddle_center = self.paddle.position.y + self.paddle.size.height / 2
         diff = ball_center - paddle_center
 
         # 4) Dead zone -> no movement when we're "close enough"

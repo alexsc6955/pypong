@@ -68,7 +68,7 @@ class PongScene(Scene):
         )
         self.ball = Ball(ball_data)
 
-        self.entities: list[SpriteEntity] = [self.left, self.right, self.ball]
+        self.entities = [self.left, self.right, self.ball]
 
         self.left_score = 0
         self.right_score = 0
@@ -148,48 +148,48 @@ class PongScene(Scene):
         self.cpu.update(dt)
 
         # Top/bottom bounce
-        if self.ball.y <= 0:
-            self.ball.y = 0
-            self.ball.vy *= -1
+        if self.ball.position.y <= 0:
+            self.ball.position.y = 0
+            self.ball.velocity.vy *= -1
 
-        if self.ball.y + self.ball.height >= self.height:
-            self.ball.y = self.height - self.ball.height
-            self.ball.vy *= -1
+        if self.ball.position.y + self.ball.size.height >= self.height:
+            self.ball.position.y = self.height - self.ball.size.height
+            self.ball.velocity.vy *= -1
 
         # Paddle collisions
         if self._intersects(self.ball, self.left):
             # snap ball outside the paddle so we don't keep intersecting
-            self.ball.x = self.left.x + self.left.width
+            self.ball.position.x = self.left.position.x + self.left.size.width
 
             # ensure it goes to the right
-            self.ball.vx = abs(self.ball.vx)
+            self.ball.velocity.vx = abs(self.ball.velocity.vx)
 
             # apply angle + inertia
             self._apply_paddle_influence(self.left)
 
         if self._intersects(self.ball, self.right):
-            self.ball.x = self.right.x - self.ball.width
+            self.ball.position.x = self.right.position.x - self.ball.size.width
 
             # ensure it goes to the left
-            self.ball.vx = -abs(self.ball.vx)
+            self.ball.velocity.vx = -abs(self.ball.velocity.vx)
 
             self._apply_paddle_influence(self.right)
 
         # Scoring – ball leaves left/right
-        if self.ball.x < 0:
+        if self.ball.position.x < 0:
             self.right_score += 1
             logger.info(
                 f"Right scores! {self.left_score} - {self.right_score}"
             )
             self._reset_ball(direction=1)
 
-        if self.ball.x > self.width:
+        if self.ball.position.x > self.width:
             self.left_score += 1
             logger.info(f"Left scores! {self.left_score} - {self.right_score}")
             self._reset_ball(direction=-1)
 
         if self.trail_enabled and hasattr(self, "ball"):
-            self.trail.append((self.ball.x, self.ball.y))
+            self.trail.append((self.ball.position.x, self.ball.position.y))
 
     def draw(self, surface: Backend):  # type: ignore[override]
         """
@@ -247,20 +247,20 @@ class PongScene(Scene):
     @staticmethod
     def _intersects(ball: Ball, paddle: Paddle) -> bool:
         return not (
-            ball.x + ball.width < paddle.x
-            or ball.x > paddle.x + paddle.width
-            or ball.y + ball.height < paddle.y
-            or ball.y > paddle.y + paddle.height
+            ball.position.x + ball.size.width < paddle.position.x
+            or ball.position.x > paddle.position.x + paddle.size.width
+            or ball.position.y + ball.size.height < paddle.position.y
+            or ball.position.y > paddle.position.y + paddle.size.height
         )
 
     def _reset_ball(self, direction: int):
         """
         Reset ball to center, heading left (-1) or right (+1).
         """
-        self.ball.x = self.width / 2 - self.ball.width / 2
-        self.ball.y = self.height / 2 - self.ball.height / 2
-        self.ball.vx = 250.0 * direction
-        self.ball.vy = 200.0
+        self.ball.position.x = self.width / 2 - self.ball.size.width / 2
+        self.ball.position.y = self.height / 2 - self.ball.size.height / 2
+        self.ball.velocity.vx = 250.0 * direction
+        self.ball.velocity.vy = 200.0
 
     def _apply_paddle_influence(self, paddle: Paddle) -> None:
         """
@@ -269,21 +269,21 @@ class PongScene(Scene):
         - paddle vertical velocity (inertia)
         """
         # 1) Position-based angle
-        ball_center = self.ball.y + self.ball.height / 2
-        paddle_center = paddle.y + paddle.height / 2
+        ball_center = self.ball.position.y + self.ball.size.height / 2
+        paddle_center = paddle.position.y + paddle.size.height / 2
         offset = (
             ball_center - paddle_center
         )  # >0 = lower half, <0 = upper half
 
         # normalize offset to [-1, 1]
-        if paddle.height > 0:
-            norm = offset / (paddle.height / 2)
+        if paddle.size.height > 0:
+            norm = offset / (paddle.size.height / 2)
         else:
             norm = 0.0
         norm = max(-1.0, min(1.0, norm))
 
         base_vy = 220.0  # base vertical speed from angle
-        inertia_factor = 0.3  # how much paddle.vy affects ball.vy
+        inertia_factor = 0.3  # how much paddle.vy affects ball.velocity.vy
         max_vy = 400.0  # safety clamp
 
         # angle component + inertia from paddle velocity
@@ -295,10 +295,10 @@ class PongScene(Scene):
         elif new_vy < -max_vy:
             new_vy = -max_vy
 
-        self.ball.vy = new_vy
+        self.ball.velocity.vy = new_vy
 
         # (optional) tiny speed-up on each hit to make rallies more intense
-        self.ball.vx *= 1.03
+        self.ball.velocity.vx *= 1.03
 
     def _photo_overlay(self, surface: Backend) -> None:
         """
