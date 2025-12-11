@@ -35,31 +35,29 @@ class PongScene(Scene):
 
     def __init__(self, game: Game):
         super().__init__(game)
-        self.width = game.config.width
-        self.height = game.config.height
         pad_w, pad_h = PADDLE_SIZE
 
-        left_position = Position2D(20, self.height / 2 - pad_h / 2)
+        left_position = Position2D(20, self.size.height / 2 - pad_h / 2)
         left_size = Size2D(pad_w, pad_h)
         self.left = Paddle(
             left_position,
             left_size,
-            window_height=self.height,
+            window_height=self.size.height,
         )
 
         right_position = Position2D(
-            self.width - 20 - pad_w, self.height / 2 - pad_h / 2
+            self.size.width - 20 - pad_w, self.size.height / 2 - pad_h / 2
         )
         right_size = Size2D(pad_w, pad_h)
         self.right = Paddle(
             right_position,
             right_size,
-            window_height=self.height,
+            window_height=self.size.height,
         )
 
         ball_data = KinematicData.rect(
-            x=self.width / 2 - 5,
-            y=self.height / 2 - 5,
+            x=self.size.width / 2 - 5,
+            y=self.size.height / 2 - 5,
             width=10,
             height=10,
             vx=250.0,
@@ -151,8 +149,8 @@ class PongScene(Scene):
             self.ball.position.y = 0
             self.ball.velocity.vy *= -1
 
-        if self.ball.position.y + self.ball.size.height >= self.height:
-            self.ball.position.y = self.height - self.ball.size.height
+        if self.ball.position.y + self.ball.size.height >= self.size.height:
+            self.ball.position.y = self.size.height - self.ball.size.height
             self.ball.velocity.vy *= -1
 
         # Paddle collisions
@@ -182,7 +180,7 @@ class PongScene(Scene):
             )
             self._reset_ball(direction=1)
 
-        if self.ball.position.x > self.width:
+        if self.ball.position.x > self.size.width:
             self.left_score += 1
             logger.info(f"Left scores! {self.left_score} - {self.right_score}")
             self._reset_ball(direction=-1)
@@ -197,9 +195,9 @@ class PongScene(Scene):
         # We assume backend.begin_frame/end_frame is handled by Game.
         # Here we just draw the center line like in the original Pong.
         line_width = 5
-        x = self.width // 2 - line_width // 2
+        x = self.size.width // 2 - line_width // 2
         y = 0
-        h = self.height
+        h = self.size.height
         surface.draw_rect(x, y, line_width, h, color=WHITE)
 
         # Scores near the top, left & right
@@ -207,7 +205,7 @@ class PongScene(Scene):
 
         # Left score (slightly left of center)
         surface.draw_text(
-            self.width // 4,
+            self.size.width // 4,
             score_y,
             str(self.left_score),
             color=WHITE,
@@ -215,7 +213,7 @@ class PongScene(Scene):
 
         # Right score (slightly right of center)
         surface.draw_text(
-            self.width * 3 // 4,
+            self.size.width * 3 // 4,
             score_y,
             str(self.right_score),
             color=WHITE,
@@ -256,8 +254,8 @@ class PongScene(Scene):
         """
         Reset ball to center, heading left (-1) or right (+1).
         """
-        self.ball.position.x = self.width / 2 - self.ball.size.width / 2
-        self.ball.position.y = self.height / 2 - self.ball.size.height / 2
+        self.ball.position.x = self.size.width / 2 - self.ball.size.width / 2
+        self.ball.position.y = self.size.height / 2 - self.ball.size.height / 2
         self.ball.velocity.vx = 250.0 * direction
         self.ball.velocity.vy = 200.0
 
