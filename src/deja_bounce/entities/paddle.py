@@ -7,15 +7,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from mini_arcade_core import (
-    Backend,
     KinematicData,
     KinematicEntity,
     Position2D,
     Size2D,
-    SpriteEntity,
 )
 
 from deja_bounce.utils import logger
+
+from .common import RectDrawMixin
 
 
 @dataclass
@@ -30,7 +30,7 @@ class PaddleConfig:
     speed: float = 300.0
 
 
-class Paddle(KinematicEntity):
+class Paddle(RectDrawMixin, KinematicEntity):
     """
     Paddle entity using mini-arcade-core's SpriteEntity.
     """
@@ -55,6 +55,12 @@ class Paddle(KinematicEntity):
         logger.info("Paddle created")
 
     def update(self, dt: float) -> None:  # override Entity.update
+        """
+        Update paddle position based on input flags.
+
+        :param dt: Delta time since last update.
+        :type dt: float
+        """
         # Configure vertical velocity from input flags
         if self.moving_up:
             self.velocity.move_up(self.speed)
@@ -77,11 +83,3 @@ class Paddle(KinematicEntity):
         if self.position.y + self.size.height > self.window_height:
             self.position.y = self.window_height - self.size.height
             self.velocity.stop_y()
-
-    def draw(self, surface: Backend) -> None:  # override Entity.draw
-        surface.draw_rect(
-            int(self.position.x),
-            int(self.position.y),
-            self.size.width,
-            self.size.height,
-        )
