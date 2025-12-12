@@ -6,6 +6,25 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-12-12
+
+### Changed
+- simplify import statements in Paddle class for improved readability
+- implement RectDrawMixin for Ball and Paddle classes to standardize drawing logic
+- remove redundant newlines in ball collision handling for cleaner code
+- integrate Bounds2D and VerticalBounce for improved ball boundary handling
+- update Paddle class to use KinematicEntity and streamline movement logic
+- remove unused _intersects method to streamline collision logic
+- replace paddle intersection checks with collider method for improved clarity
+- integrate PaddleConfig into Paddle initialization and update PongScene entity setup
+- replace direct width and height access with size attributes in PongScene
+- remove unused SpriteEntity import from pong.py
+- update ball and paddle entities to use position and size attributes
+- update Ball and Paddle classes to use KinematicEntity and improve initialization
+
+### Other
+- Merge release/1.0 into develop
+
 ## [1.0.2] - 2025-12-08
 
 - Internal changes only.
