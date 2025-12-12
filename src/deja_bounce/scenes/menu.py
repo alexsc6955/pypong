@@ -16,7 +16,6 @@ from deja_bounce.constants import (
     DIM,
     HIGHLIGHT,
     WHITE,
-    WINDOW_SIZE,
 )
 from deja_bounce.utils import logger
 
@@ -32,7 +31,6 @@ class MenuScene(Scene):
 
     def __init__(self, game: Game):
         super().__init__(game)
-        self.width, self.height = WINDOW_SIZE
         self.selected_index = 0  # 0 = Start, 1 = Quit
 
         self.add_overlay(self._title_overlay)
@@ -105,18 +103,18 @@ class MenuScene(Scene):
         Render a very simple menu using rectangles as buttons.
         No text support in backend yet, so we rely on shapes.
         """
-        option_w = self.width // 3
+        option_w = self.size.width // 3
         option_h = 40
-        x = self.width // 2 - option_w // 2
+        x = self.size.width // 2 - option_w // 2
         gap = 20
 
-        start_y = self.height // 2 - option_h - gap // 2
-        quit_y = self.height // 2 + gap // 2
+        start_y = self.size.height // 2 - option_h - gap // 2
+        quit_y = self.size.height // 2 + gap // 2
 
         # Title
         surface.draw_text(
-            self.width // 2 - 100,
-            self.height // 3 - 40,
+            self.size.width // 2 - 100,
+            self.size.height // 3 - 40,
             "DEJA BOUNCE",
             color=WHITE,
         )
@@ -145,7 +143,7 @@ class MenuScene(Scene):
 
     def _title_overlay(self, surface: Backend) -> None:
         surface.draw_text(
-            self.width // 2 - 80,
+            self.size.width // 2 - 80,
             80,
             "Deja Bounce",
             color=WHITE,
@@ -153,7 +151,7 @@ class MenuScene(Scene):
 
     def _hint_overlay(self, surface: Backend) -> None:
         surface.draw_text(
-            self.width // 2 - 120,
+            self.size.width // 2 - 120,
             130,
             "Press ENTER to start · ESC to quit",
             color=(200, 200, 200),
