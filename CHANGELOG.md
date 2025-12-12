@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-12-12
+
+### Changed
+- replace WINDOW_SIZE with size attribute in MenuScene for consistency
+
 ## [1.1.0] - 2025-12-12
 
 ### Changed
