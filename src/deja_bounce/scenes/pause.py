@@ -1,0 +1,52 @@
+"""
+Pause scene for Deja Bounce game.
+Provides a menu to continue or return to the main menu.
+"""
+
+from mini_arcade_core import Event, EventType, Scene
+from mini_arcade_core.backend import Backend
+from mini_arcade_core.ui.menu import Menu, MenuItem
+
+from deja_bounce.scenes.menu import MenuScene
+
+
+class PauseScene(Scene):
+    """Pause scene with options to continue or return to main menu."""
+
+    menu: Menu
+
+    def _pop_scene(self):
+        self.game.pop_scene()
+
+    def _change_to_main_menu(self):
+        self.game.change_scene(MenuScene(self.game))
+
+    def on_enter(self):
+        """Initialize the pause menu."""
+        self.menu = Menu(
+            [
+                MenuItem("Continue", self._pop_scene),
+                MenuItem(
+                    "Main Menu",
+                    self._change_to_main_menu,
+                ),
+            ],
+            x=60,
+            y=80,
+        )
+
+    def on_exit(self): ...
+
+    def handle_event(self, event: Event):
+        self.menu.handle_event(
+            event, up_key=1073741906, down_key=1073741905, select_key=13
+        )  # example keycodes
+        if event.type == EventType.KEYDOWN and event.key == 27:  # ESC
+            self.game.pop_scene()
+
+    def update(self, dt: float): ...  # pause menu logic only
+
+    def draw(self, surface: Backend):
+        # Optional: draw a "PAUSED" label + menu
+        surface.draw_text(60, 40, "PAUSED")
+        self.menu.draw(surface)

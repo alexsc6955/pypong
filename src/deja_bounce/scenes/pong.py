@@ -27,6 +27,7 @@ from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
 from deja_bounce.controllers import CpuConfig, CpuPaddleController
 from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
+from .pause import PauseScene
 
 
 # pylint: disable=too-many-instance-attributes
@@ -134,13 +135,7 @@ class PongScene(Scene):
                 return
 
             if event.key == 27:  # ESC
-                # Justification: Importing here to avoid cyclic import issues.
-                # pylint: disable=import-outside-toplevel
-                from deja_bounce.scenes.menu import MenuScene
-
-                # pylint: enable=import-outside-toplevel
-
-                self.game.change_scene(MenuScene(self.game))
+                self.game.push_scene(PauseScene(self.game), as_overlay=True)
                 return
 
             # Left paddle: W / S
