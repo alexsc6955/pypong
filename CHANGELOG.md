@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.2] - 2025-12-15
+
+### Added
+- add PauseScene for game pause functionality with menu options
+
 ## [1.1.1] - 2025-12-12
 
 ### Changed
