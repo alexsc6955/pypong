@@ -27,6 +27,7 @@ from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
 from deja_bounce.controllers import CpuConfig, CpuPaddleController
 from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
+
 from .pause import PauseScene
 
 
