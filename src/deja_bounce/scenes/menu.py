@@ -10,7 +10,14 @@ Minimal main menu scene for Deja Bounce.
 # pylint: disable=duplicate-code
 from __future__ import annotations
 
-from mini_arcade_core import Backend, Event, EventType, Key, Scene
+from mini_arcade_core import (
+    Backend,
+    Event,
+    EventType,
+    Key,
+    Scene,
+    register_scene,
+)
 from mini_arcade_core.ui.menu import Menu, MenuItem, MenuStyle
 
 from deja_bounce.constants import (
@@ -24,6 +31,7 @@ from deja_bounce.constants import (
 from deja_bounce.utils import logger
 
 
+@register_scene("menu")
 class MenuScene(Scene):
     """
     Simple main menu scene for Deja Bounce.
@@ -97,11 +105,6 @@ class MenuScene(Scene):
 
     def draw(self, surface: Backend):  # type: ignore[override]
         self.menu.draw(surface)
-
-
-def menu_scene_factory(game):
-    """Menu scene factory."""
-    return MenuScene(game)
 
 
 # pylint: enable=cyclic-import,duplicate-code

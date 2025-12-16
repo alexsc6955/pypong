@@ -8,20 +8,12 @@ from mini_arcade_core import GameConfig, SceneRegistry, run_game
 from mini_arcade_native_backend import NativeBackend
 
 from deja_bounce.constants import ASSETS_ROOT, FPS, WINDOW_SIZE
-from deja_bounce.scenes import (
-    MenuScene,
-    menu_scene_factory,
-    pause_scene_factory,
-    pong_scene_factory,
-)
+from deja_bounce.scenes import MenuScene
 
 
 def run():
     """Main entry point for DejaBounce."""
-    registry = SceneRegistry(_factories={})
-    registry.register("menu", menu_scene_factory)
-    registry.register("pong", pong_scene_factory)
-    registry.register("pause", pause_scene_factory)
+    registry = SceneRegistry(_factories={}).discover("deja_bounce.scenes")
 
     font_path = ASSETS_ROOT / "fonts" / "deja_vu_dive" / "Deja-vu_dive.ttf"
 

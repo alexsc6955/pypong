@@ -22,6 +22,7 @@ from mini_arcade_core import (
     Scene,
     Size2D,
     VerticalBounce,
+    register_scene,
 )
 
 from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
@@ -31,6 +32,7 @@ from deja_bounce.utils import logger
 
 
 # pylint: disable=too-many-instance-attributes
+@register_scene("pong")
 class PongScene(Scene):
     """
     Minimal scene: opens a window, clears screen, handles quit/ESC.
@@ -320,11 +322,6 @@ class PongScene(Scene):
             extra,
             color=(155, 155, 255),
         )
-
-
-def pong_scene_factory(game):
-    """Pong scene factory."""
-    return PongScene(game)
 
 
 # pylint: enable=cyclic-import

@@ -6,11 +6,12 @@ Provides a menu to continue or return to the main menu.
 # Justification: Duplicate code with PauseScene; acceptable for now.
 # pylint: disable=duplicate-code
 
-from mini_arcade_core import Event, EventType, Key, Scene
+from mini_arcade_core import Event, EventType, Key, Scene, register_scene
 from mini_arcade_core.backend import Backend
 from mini_arcade_core.ui.menu import Menu, MenuItem, MenuStyle
 
 
+@register_scene("pause")
 class PauseScene(Scene):
     """Pause scene with options to continue or return to main menu."""
 
@@ -66,11 +67,6 @@ class PauseScene(Scene):
 
     def draw(self, surface: Backend):
         self.menu.draw(surface)
-
-
-def pause_scene_factory(game):
-    """Pause scene factory."""
-    return PauseScene(game)
 
 
 # pylint: enable=duplicate-code
