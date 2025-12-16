@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.3] - 2025-12-16
+
+### Fixed
+- update dependencies and refactor key handling for consistency across scenes
+
 ## [1.1.2] - 2025-12-15
 
 ### Added
