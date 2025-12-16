@@ -3,9 +3,12 @@ Pause scene for Deja Bounce game.
 Provides a menu to continue or return to the main menu.
 """
 
+# Justification: Duplicate code with PauseScene; acceptable for now.
+# pylint: disable=duplicate-code
+
 from mini_arcade_core import Event, EventType, Key, Scene
 from mini_arcade_core.backend import Backend
-from mini_arcade_core.ui.menu import Menu, MenuItem
+from mini_arcade_core.ui.menu import Menu, MenuItem, MenuStyle
 
 from deja_bounce.scenes.menu import MenuScene
 
@@ -23,6 +26,15 @@ class PauseScene(Scene):
 
     def on_enter(self):
         """Initialize the pause menu."""
+        pause_style = MenuStyle(
+            overlay_color=(0, 0, 0, 0.5),
+            panel_color=(
+                20,
+                20,
+                20,
+                0.75,
+            ),
+        )
         self.menu = Menu(
             [
                 MenuItem("Continue", self._pop_scene),
@@ -31,8 +43,9 @@ class PauseScene(Scene):
                     self._change_to_main_menu,
                 ),
             ],
-            x=60,
-            y=80,
+            viewport=self.size,
+            title="PAUSED",  # set to None to disable
+            style=pause_style,
         )
 
     def on_exit(self): ...
@@ -54,9 +67,7 @@ class PauseScene(Scene):
     def update(self, dt: float): ...  # pause menu logic only
 
     def draw(self, surface: Backend):
-        x, y = 0, 0
-        w, h = self.size.width, self.size.height
-
-        surface.draw_rect(x, y, w, h, color=(0, 0, 0, 0.5))
-        surface.draw_text(60, 40, "PAUSED")
         self.menu.draw(surface)
+
+
+# pylint: enable=duplicate-code
