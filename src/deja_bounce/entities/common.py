@@ -22,7 +22,7 @@ class RectDrawMixin:
     position: Position2D
     size: Size2D
 
-    def draw(self, surface: Backend) -> None:
+    def draw(self, surface: Backend):
         """
         Default rect-based draw implementation.
 

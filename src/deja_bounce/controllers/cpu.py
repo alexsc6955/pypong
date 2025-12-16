@@ -39,7 +39,7 @@ class CpuPaddleController:
         paddle: Paddle,
         ball: Ball,
         config: CpuConfig | None = None,
-    ) -> None:
+    ):
         self.paddle = paddle
         self.ball = ball
         self.config = config or CpuConfig()
@@ -53,13 +53,13 @@ class CpuPaddleController:
         m = self.config.error_margin
         return random.uniform(-m, m) if m > 0 else 0.0
 
-    def _stop(self) -> None:
+    def _stop(self):
         self.paddle.moving_up = False
         self.paddle.moving_down = False
 
     # Justification: dt is unused but kept for interface consistency
     # pylint: disable=unused-argument
-    def update(self, dt: float) -> None:
+    def update(self, dt: float):
         """
         Update CPU paddle movement based on ball position.
 

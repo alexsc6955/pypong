@@ -49,7 +49,7 @@ class Paddle(RectDrawMixin, KinematicEntity):
 
         logger.info("Paddle created")
 
-    def update(self, dt: float) -> None:  # override Entity.update
+    def update(self, dt: float):  # override Entity.update
         """
         Update paddle position based on input flags.
 

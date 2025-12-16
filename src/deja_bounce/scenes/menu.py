@@ -37,7 +37,7 @@ class MenuScene(Scene):
 
     # --- Scene lifecycle -----------------------------------------------------
 
-    def on_enter(self) -> None:
+    def on_enter(self):
         logger.info("MenuScene on_enter")
 
         def start_game():
@@ -70,12 +70,12 @@ class MenuScene(Scene):
             style=style,
         )
 
-    def on_exit(self) -> None:
+    def on_exit(self):
         logger.info("MenuScene on_exit")
 
     # --- Input ---------------------------------------------------------------
 
-    def handle_event(self, event: Event) -> None:  # type: ignore[override]
+    def handle_event(self, event: Event):  # type: ignore[override]
         if event.type == EventType.QUIT:
             self.game.quit()
             return
@@ -93,9 +93,9 @@ class MenuScene(Scene):
 
     # --- Update / Draw -------------------------------------------------------
 
-    def update(self, dt: float) -> None: ...
+    def update(self, dt: float): ...
 
-    def draw(self, surface: Backend) -> None:  # type: ignore[override]
+    def draw(self, surface: Backend):  # type: ignore[override]
         self.menu.draw(surface)
 
 

@@ -248,7 +248,7 @@ class PongScene(Scene):
         self.ball.velocity.vx = 250.0 * direction
         self.ball.velocity.vy = 200.0
 
-    def _apply_paddle_influence(self, paddle: Paddle) -> None:
+    def _apply_paddle_influence(self, paddle: Paddle):
         """
         Adjust ball trajectory based on:
         - where it hit on the paddle (top/middle/bottom)
@@ -286,7 +286,7 @@ class PongScene(Scene):
         # (optional) tiny speed-up on each hit to make rallies more intense
         self.ball.velocity.vx *= 1.03
 
-    def _photo_overlay(self, surface: Backend) -> None:
+    def _photo_overlay(self, surface: Backend):
         """
         Overlay drawn on top of everything when photo_mode is enabled.
         Perfect for promo/devlog screenshots.
