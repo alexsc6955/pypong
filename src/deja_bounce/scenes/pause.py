@@ -54,6 +54,9 @@ class PauseScene(Scene):
     def update(self, dt: float): ...  # pause menu logic only
 
     def draw(self, surface: Backend):
-        # Optional: draw a "PAUSED" label + menu
+        x, y = 0, 0
+        w, h = self.size.width, self.size.height
+
+        surface.draw_rect(x, y, w, h, color=(0, 0, 0, 0.5))
         surface.draw_text(60, 40, "PAUSED")
         self.menu.draw(surface)
