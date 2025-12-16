@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.6] - 2025-12-16
+
+### Added
+- register scenes with SceneRegistry and remove factory functions
+
+### Changed
+- remove redundant return types from method signatures
+
 ## [1.1.5] - 2025-12-16
 
 ### Added
