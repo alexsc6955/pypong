@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.5] - 2025-12-16
+
+### Added
+- integrate SceneRegistry for scene management and simplify scene transitions
+- enhance menu functionality in MenuScene and PauseScene with MenuStyle integration
+
+### Other
+- Merge branch 'release/1.1' of github.com:alexsc6955/deja-bounce into release/1.1
+
 ## [1.1.4] - 2025-12-16
 
 ### Fixed
