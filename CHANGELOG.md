@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.4] - 2025-12-16
+
+### Fixed
+- improve draw method in PauseScene to ensure proper rendering of pause overlay
+
 ## [1.1.3] - 2025-12-16
 
 ### Fixed
