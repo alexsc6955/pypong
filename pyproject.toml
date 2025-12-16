@@ -11,8 +11,8 @@ readme = "README.md"
 requires-python = ">=3.9,<3.12"
 license = { file = "LICENSE" }
 dependencies = [
-  "mini-arcade-core~=0.8",
-  "mini-arcade-native-backend~=0.3",
+  "mini-arcade-core~=0.9",
+  "mini-arcade-native-backend~=0.4",
 ]
 
 [project.optional-dependencies]

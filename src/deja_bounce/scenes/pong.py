@@ -16,6 +16,7 @@ from mini_arcade_core import (
     Event,
     EventType,
     Game,
+    Key,
     KinematicData,
     Position2D,
     Scene,
@@ -119,36 +120,36 @@ class PongScene(Scene):
         if event.type == EventType.KEYDOWN:
             logger.debug(f"Key down: {event.key}")
 
-            if event.key == ord("t"):
+            if event.key == Key.T:
                 self.trail_enabled = not self.trail_enabled
 
-            if event.key == ord("p"):
+            if event.key == Key.P:
                 # toggle photo mode; ensure trail on when enabled
                 self.photo_mode = not self.photo_mode
                 if self.photo_mode:
                     self.trail_enabled = True
 
-            if event.key == 1073741893:  # F12
+            if event.key == Key.F12:
                 self.game.screenshot(
                     "screenshot.bmp", str(ROOT / "screenshots")
                 )
                 logger.info("Screenshot saved: screenshot.bmp")
                 return
 
-            if event.key == 27:  # ESC
+            if event.key == Key.ESCAPE:  # ESC
                 self.game.push_scene(PauseScene(self.game), as_overlay=True)
                 return
 
             # Left paddle: W / S
-            if event.key == ord("w"):
+            if event.key == Key.W:
                 self.left_paddle.moving_up = True
-            if event.key == ord("s"):
+            if event.key == Key.S:
                 self.left_paddle.moving_down = True
 
         elif event.type == EventType.KEYUP:
-            if event.key == ord("w"):
+            if event.key == Key.W:
                 self.left_paddle.moving_up = False
-            if event.key == ord("s"):
+            if event.key == Key.S:
                 self.left_paddle.moving_down = False
 
     def update(self, dt: float):

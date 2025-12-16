@@ -3,7 +3,7 @@ Pause scene for Deja Bounce game.
 Provides a menu to continue or return to the main menu.
 """
 
-from mini_arcade_core import Event, EventType, Scene
+from mini_arcade_core import Event, EventType, Key, Scene
 from mini_arcade_core.backend import Backend
 from mini_arcade_core.ui.menu import Menu, MenuItem
 
@@ -38,10 +38,17 @@ class PauseScene(Scene):
     def on_exit(self): ...
 
     def handle_event(self, event: Event):
+        if event.type == EventType.QUIT:
+            self.game.quit()
+            return
+
         self.menu.handle_event(
-            event, up_key=1073741906, down_key=1073741905, select_key=13
+            event,
+            up_key=Key.UP,
+            down_key=Key.DOWN,
+            select_key=Key.ENTER,
         )  # example keycodes
-        if event.type == EventType.KEYDOWN and event.key == 27:  # ESC
+        if event.type == EventType.KEYDOWN and event.key == Key.ESCAPE:  # ESC
             self.game.pop_scene()
 
     def update(self, dt: float): ...  # pause menu logic only

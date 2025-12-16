@@ -7,7 +7,7 @@ Minimal main menu scene for Deja Bounce.
 # pylint: disable=cyclic-import
 from __future__ import annotations
 
-from mini_arcade_core import Backend, Event, EventType, Game, Scene
+from mini_arcade_core import Backend, Event, EventType, Game, Key, Scene
 
 from deja_bounce.constants import (
     BACKGROUND,
@@ -65,25 +65,25 @@ class MenuScene(Scene):
         logger.debug(f"Menu key down: {key}")
 
         # ESC quits from menu
-        if key == 27:
+        if key == Key.ESCAPE:
             logger.info("Menu: ESC pressed, quitting game")
             self.game.quit()
             return
 
         # Up (W or arrow up) -> previous option
-        if key in (ord("w"), 1073741906):  # SDL_K_UP
+        if key in (Key.W, Key.UP):  # SDL_K_UP
             self.selected_index = (self.selected_index - 1) % 2
             logger.info(f"Menu: selected_index={self.selected_index}")
             return
 
         # Down (S or arrow down) -> next option
-        if key in (ord("s"), 1073741905):  # SDL_K_DOWN
+        if key in (Key.S, Key.DOWN):  # SDL_K_DOWN
             self.selected_index = (self.selected_index + 1) % 2
             logger.info(f"Menu: selected_index={self.selected_index}")
             return
 
         # Enter or Space -> confirm
-        if key in (13, 32):  # Enter or Space
+        if key in (Key.ENTER, Key.SPACE):  # Enter or Space
             if self.selected_index == 0:
                 logger.info("Menu: Start Game selected")
                 # Switch to PongScene
