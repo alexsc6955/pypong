@@ -8,9 +8,17 @@ Scene modules for Deja Bounce.
 # pylint: disable=cyclic-import
 from __future__ import annotations
 
-from .menu import MenuScene
-from .pong import PongScene
+from .menu import MenuScene, menu_scene_factory
+from .pause import PauseScene, pause_scene_factory
+from .pong import PongScene, pong_scene_factory
 
-__all__ = ["PongScene", "MenuScene"]
+__all__ = [
+    "PongScene",
+    "pong_scene_factory",
+    "MenuScene",
+    "menu_scene_factory",
+    "PauseScene",
+    "pause_scene_factory",
+]
 
 # pylint: enable=cyclic-import

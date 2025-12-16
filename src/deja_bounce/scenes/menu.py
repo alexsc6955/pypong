@@ -41,11 +41,7 @@ class MenuScene(Scene):
         logger.info("MenuScene on_enter")
 
         def start_game():
-            # pylint: disable=import-outside-toplevel
-            from .pong import PongScene
-
-            # pylint: enable=import-outside-toplevel
-            self.game.change_scene(PongScene(self.game))
+            self.game.change_scene("pong")
 
         def quit_game():
             self.game.quit()
@@ -101,6 +97,11 @@ class MenuScene(Scene):
 
     def draw(self, surface: Backend) -> None:  # type: ignore[override]
         self.menu.draw(surface)
+
+
+def menu_scene_factory(game):
+    """Menu scene factory."""
+    return MenuScene(game)
 
 
 # pylint: enable=cyclic-import,duplicate-code

@@ -29,8 +29,6 @@ from deja_bounce.controllers import CpuConfig, CpuPaddleController
 from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
 
-from .pause import PauseScene
-
 
 # pylint: disable=too-many-instance-attributes
 class PongScene(Scene):
@@ -137,7 +135,7 @@ class PongScene(Scene):
                 return
 
             if event.key == Key.ESCAPE:  # ESC
-                self.game.push_scene(PauseScene(self.game), as_overlay=True)
+                self.game.push_scene("pause", as_overlay=True)
                 return
 
             # Left paddle: W / S
@@ -322,6 +320,11 @@ class PongScene(Scene):
             extra,
             color=(155, 155, 255),
         )
+
+
+def pong_scene_factory(game):
+    """Pong scene factory."""
+    return PongScene(game)
 
 
 # pylint: enable=cyclic-import

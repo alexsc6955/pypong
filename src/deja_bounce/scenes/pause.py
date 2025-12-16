@@ -10,8 +10,6 @@ from mini_arcade_core import Event, EventType, Key, Scene
 from mini_arcade_core.backend import Backend
 from mini_arcade_core.ui.menu import Menu, MenuItem, MenuStyle
 
-from deja_bounce.scenes.menu import MenuScene
-
 
 class PauseScene(Scene):
     """Pause scene with options to continue or return to main menu."""
@@ -22,7 +20,7 @@ class PauseScene(Scene):
         self.game.pop_scene()
 
     def _change_to_main_menu(self):
-        self.game.change_scene(MenuScene(self.game))
+        self.game.change_scene("menu")
 
     def on_enter(self):
         """Initialize the pause menu."""
@@ -68,6 +66,11 @@ class PauseScene(Scene):
 
     def draw(self, surface: Backend):
         self.menu.draw(surface)
+
+
+def pause_scene_factory(game):
+    """Pause scene factory."""
+    return PauseScene(game)
 
 
 # pylint: enable=duplicate-code
