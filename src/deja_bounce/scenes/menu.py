@@ -28,6 +28,7 @@ from deja_bounce.constants import (
     HIGHLIGHT,
     WHITE,
 )
+from deja_bounce.difficulty import DIFFICULTY_PRESETS
 from deja_bounce.utils import logger
 
 
@@ -47,6 +48,19 @@ class MenuScene(Scene):
 
     def on_enter(self):
         logger.info("MenuScene on_enter")
+
+        levels = list(DIFFICULTY_PRESETS.keys())
+
+        def cycle_difficulty():
+            cur = self.game.settings.difficulty
+            idx = levels.index(cur) if cur in levels else 0
+            new = levels[(idx + 1) % len(levels)]
+            self.game.settings.difficulty = new
+
+            # update the label live
+            self.menu.items[2] = MenuItem(
+                f"DIFFICULTY: {new.upper()}", cycle_difficulty
+            )
 
         def start_game():
             self.game.change_scene("pong")
@@ -68,11 +82,17 @@ class MenuScene(Scene):
             hint_color=(200, 200, 200),
         )
 
+        items = [
+            MenuItem("START", start_game),
+            MenuItem("QUIT", quit_game),
+            MenuItem(
+                f"DIFFICULTY: {self.game.settings.difficulty.upper()}",
+                cycle_difficulty,
+            ),
+        ]
+
         self.menu = Menu(
-            [
-                MenuItem("START", start_game),
-                MenuItem("QUIT", quit_game),
-            ],
+            items,
             viewport=self.size,
             title="Deja Bounce",
             style=style,

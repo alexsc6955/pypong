@@ -27,6 +27,7 @@ from mini_arcade_core import (
 
 from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
 from deja_bounce.controllers import CpuConfig, CpuPaddleController
+from deja_bounce.difficulty import DIFFICULTY_PRESETS
 from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
 
@@ -53,7 +54,8 @@ class PongScene(Scene):
         self.left_score = 0
         self.right_score = 0
 
-        cpu_cfg = CpuConfig(max_speed=260.0, dead_zone=4.0)
+        level = self.game.settings.difficulty
+        cpu_cfg = DIFFICULTY_PRESETS.get(level, DIFFICULTY_PRESETS["normal"])
         self.cpu = CpuPaddleController(
             self.right_paddle, self.ball, config=cpu_cfg
         )
