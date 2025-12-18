@@ -20,4 +20,3 @@ class Ball(RectDrawMixin, KinematicEntity):
         super().__init__(data)
 
         logger.info("Ball created")
-        logger.info("Ball created")

@@ -40,6 +40,16 @@ class CpuPaddleController:
         ball: Ball,
         config: CpuConfig | None = None,
     ):
+        """
+        :param paddle: The paddle to control.
+        :type paddle: Paddle
+
+        :param ball: The ball to track.
+        :type ball: Ball
+
+        :param config: The CPU configuration settings.
+        :type config: CpuConfig, optional
+        """
         self.paddle = paddle
         self.ball = ball
         self.config = config or CpuConfig()

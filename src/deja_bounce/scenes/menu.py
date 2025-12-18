@@ -40,6 +40,8 @@ class MenuScene(Scene):
     Options:
       [0] Start Game
       [1] Quit
+
+    :ivar menu (Menu): The menu instance.
     """
 
     menu: Menu

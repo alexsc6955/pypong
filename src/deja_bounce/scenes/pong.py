@@ -44,6 +44,10 @@ class PongScene(Scene):
     ball: Ball
 
     def __init__(self, game: Game):
+        """
+        :param game: The game instance.
+        :type game: Game
+        """
         super().__init__(game)
 
         self.bounds = Bounds2D.from_size(self.size)

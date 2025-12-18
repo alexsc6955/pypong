@@ -13,7 +13,11 @@ from mini_arcade_core.ui.menu import Menu, MenuItem, MenuStyle
 
 @register_scene("pause")
 class PauseScene(Scene):
-    """Pause scene with options to continue or return to main menu."""
+    """
+    Pause scene with options to continue or return to main menu.
+
+    :ivar menu (Menu): The menu instance.
+    """
 
     menu: Menu
 

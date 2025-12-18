@@ -1,5 +1,8 @@
 """
 Difficulty presets for CPU-controlled paddles.
+
+:cvar DIFFICULTY_PRESETS (dict[str, CpuConfig]):
+    A dictionary mapping difficulty levels to CpuConfig instances.
 """
 
 from deja_bounce.controllers import CpuConfig

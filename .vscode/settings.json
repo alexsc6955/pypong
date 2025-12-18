@@ -26,4 +26,16 @@
     "python.analysis.autoImportCompletions": true,
     "black-formatter.importStrategy": "fromEnvironment",
     "isort.importStrategy": "fromEnvironment",
+    "cSpell.words": [
+        "clsname",
+        "devlog",
+        "funcs",
+        "getframe",
+        "ivar",
+        "KEYUP",
+        "MEIPASS",
+        "onefile",
+        "rtype",
+        "staticmethods"
+    ],
 }

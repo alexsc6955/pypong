@@ -17,6 +17,11 @@ from .common import RectDrawMixin
 class PaddleConfig:
     """
     Configuration for Paddle entity.
+
+    :ivar position (Position2D): Initial position of the paddle.
+    :ivar size (Size2D): Size of the paddle.
+    :ivar window_height (int): Height of the game window for clamping.
+    :ivar speed (float): Movement speed of the paddle.
     """
 
     position: Position2D
@@ -32,6 +37,10 @@ class Paddle(RectDrawMixin, KinematicEntity):
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(self, config: PaddleConfig):
+        """
+        :param config: Paddle configuration.
+        :type config: PaddleConfig
+        """
         data = KinematicData.rect(
             x=config.position.x,
             y=config.position.y,
