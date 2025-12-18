@@ -1,5 +1,5 @@
 """
-Dificulty presets for CPU-controlled paddles.
+Difficulty presets for CPU-controlled paddles.
 """
 
 from deja_bounce.controllers import CpuConfig

@@ -26,7 +26,7 @@ from mini_arcade_core import (
 )
 
 from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
-from deja_bounce.controllers import CpuConfig, CpuPaddleController
+from deja_bounce.controllers import CpuPaddleController
 from deja_bounce.difficulty import DIFFICULTY_PRESETS
 from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
