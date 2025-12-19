@@ -6,6 +6,22 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.7] - 2025-12-19
+
+### Added
+- add difficulty presets for CPU and integrate into menu and pong scenes
+
+### Fixed
+- update run_game call to use initial_scene parameter instead of MenuScene
+- correct spelling in difficulty docstring and remove unused import in pong scene
+
+### Changed
+- consolidate menu scene functionality into BaseMenuScene and simplify menu handling
+- enhance documentation with type hints and improve asset path retrieval
+
+### Other
+- Merge branch 'release/1.1' of github.com:alexsc6955/deja-bounce into release/1.1
+
 ## [1.1.6] - 2025-12-16
 
 ### Added
