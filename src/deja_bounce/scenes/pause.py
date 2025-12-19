@@ -3,23 +3,28 @@ Pause scene for Deja Bounce game.
 Provides a menu to continue or return to the main menu.
 """
 
-# Justification: Duplicate code with PauseScene; acceptable for now.
-# pylint: disable=duplicate-code
+from __future__ import annotations
 
-from mini_arcade_core import Event, EventType, Key, Scene, register_scene
-from mini_arcade_core.backend import Backend
-from mini_arcade_core.ui.menu import Menu, MenuItem, MenuStyle
+from mini_arcade_core import register_scene
+from mini_arcade_core.ui.menu import MenuItem, MenuStyle
+
+from deja_bounce.scenes.base_menu_scene import BaseMenuScene
 
 
 @register_scene("pause")
-class PauseScene(Scene):
+class PauseScene(BaseMenuScene):
     """
     Pause scene with options to continue or return to main menu.
-
-    :ivar menu (Menu): The menu instance.
     """
 
-    menu: Menu
+    def menu_title(self) -> str | None:
+        return "PAUSED"
+
+    def menu_style(self) -> MenuStyle:
+        return MenuStyle(
+            overlay_color=(0, 0, 0, 0.5),
+            panel_color=(20, 20, 20, 0.75),
+        )
 
     def _pop_scene(self):
         self.game.pop_scene()
@@ -27,50 +32,12 @@ class PauseScene(Scene):
     def _change_to_main_menu(self):
         self.game.change_scene("menu")
 
-    def on_enter(self):
+    def menu_items(self):
         """Initialize the pause menu."""
-        pause_style = MenuStyle(
-            overlay_color=(0, 0, 0, 0.5),
-            panel_color=(
-                20,
-                20,
-                20,
-                0.75,
+        return [
+            MenuItem("Continue", self._pop_scene),
+            MenuItem(
+                "Main Menu",
+                self._change_to_main_menu,
             ),
-        )
-        self.menu = Menu(
-            [
-                MenuItem("Continue", self._pop_scene),
-                MenuItem(
-                    "Main Menu",
-                    self._change_to_main_menu,
-                ),
-            ],
-            viewport=self.size,
-            title="PAUSED",  # set to None to disable
-            style=pause_style,
-        )
-
-    def on_exit(self): ...
-
-    def handle_event(self, event: Event):
-        if event.type == EventType.QUIT:
-            self.game.quit()
-            return
-
-        self.menu.handle_event(
-            event,
-            up_key=Key.UP,
-            down_key=Key.DOWN,
-            select_key=Key.ENTER,
-        )  # example keycodes
-        if event.type == EventType.KEYDOWN and event.key == Key.ESCAPE:  # ESC
-            self.game.pop_scene()
-
-    def update(self, dt: float): ...  # pause menu logic only
-
-    def draw(self, surface: Backend):
-        self.menu.draw(surface)
-
-
-# pylint: enable=duplicate-code
+        ]
