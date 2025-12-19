@@ -8,7 +8,6 @@ from mini_arcade_core import GameConfig, SceneRegistry, run_game
 from mini_arcade_native_backend import NativeBackend
 
 from deja_bounce.constants import ASSETS_ROOT, FPS, WINDOW_SIZE
-from deja_bounce.scenes import MenuScene
 
 
 def run():
@@ -26,7 +25,7 @@ def run():
         fps=FPS,
         backend=backend,
     )
-    run_game(MenuScene, config=config, registry=registry)
+    run_game(config=config, registry=registry, initial_scene="menu")
 
 
 if __name__ == "__main__":
