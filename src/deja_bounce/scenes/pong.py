@@ -13,6 +13,7 @@ from collections import deque
 from mini_arcade_core import (
     Backend,
     Bounds2D,
+    CheatManager,
     Event,
     EventType,
     Game,
@@ -30,6 +31,8 @@ from deja_bounce.controllers import CpuPaddleController
 from deja_bounce.difficulty import DIFFICULTY_PRESETS
 from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
+
+P1_SIDE = "LEFT"
 
 
 # pylint: disable=too-many-instance-attributes
@@ -50,6 +53,11 @@ class PongScene(Scene):
         """
         super().__init__(game)
 
+        self.cheats = CheatManager(buffer_size=16)
+        self.god_mode = False
+        self.slow_mo = False
+        self.cpu_vs_cpu = False
+
         self.bounds = Bounds2D.from_size(self.size)
         self.ball_vertical_bounds = VerticalBounce(self.bounds)
 
@@ -68,7 +76,7 @@ class PongScene(Scene):
         self.trail = deque(maxlen=15)
 
         self.photo_mode = False
-        self.add_overlay(self._photo_overlay)
+        self.services.overlays.add(self._photo_overlay)
 
     def _set_entities(self):
         pad_w, pad_h = PADDLE_SIZE
@@ -106,10 +114,53 @@ class PongScene(Scene):
             )
         )
 
-        self.add_entity(self.left_paddle, self.right_paddle, self.ball)
+        self.services.entities.add(
+            self.left_paddle, self.right_paddle, self.ball
+        )
 
     def on_enter(self):
         logger.info("PongScene on_enter")
+        self.cheats.register_code(
+            "god_mode",
+            ["G", "O", "D"],
+            callback=lambda scene: scene.toggle_god_mode(),
+        )
+        self.cheats.register_code(
+            "slow_mo",
+            ["S", "L", "O", "W"],
+            callback=lambda scene: scene.toggle_slow_mo(),
+        )
+        self.cheats.register_code(
+            "photo_mode",
+            ["P", "H", "O", "T", "O"],
+            callback=lambda scene: scene.toggle_photo_mode(),
+        )
+        self.cheats.register_code(
+            "cpu_vs_cpu",
+            ["C", "P", "U", "C", "P", "U"],
+            callback=lambda scene: scene.toggle_cpu_vs_cpu(),
+        )
+
+        # Konami-style (example)
+        self.cheats.register_code(
+            "blood_mode",
+            [
+                "UP",
+                "UP",
+                "DOWN",
+                "DOWN",
+                "LEFT",
+                "RIGHT",
+                "LEFT",
+                "RIGHT",
+                "B",
+                "A",
+            ],
+            callback=lambda scene: scene.enable_blood_mode(),
+            clear_buffer_on_match=True,
+        )
+
+        logger.info("Cheat codes registered")
 
     def on_exit(self):
         logger.info("PongScene on_exit")
@@ -125,6 +176,8 @@ class PongScene(Scene):
 
         if event.type == EventType.KEYDOWN:
             logger.debug(f"Key down: {event.key}")
+
+            self.cheats.process_event(event, self)
 
             if event.key == Key.T:
                 self.trail_enabled = not self.trail_enabled
@@ -162,7 +215,7 @@ class PongScene(Scene):
         """
         Update game logic. (None yet.)
         """
-        self.update_entities(dt)
+        self.services.entities.update(dt)
         self.cpu.update(dt)
 
         # Top/bottom bounce
@@ -175,6 +228,7 @@ class PongScene(Scene):
             )
             self.ball.velocity.vx = abs(self.ball.velocity.vx)
             self._apply_paddle_influence(self.left_paddle)
+
         if self.ball.collider.intersects(self.right_paddle.collider):
             self.ball.position.x = (
                 self.right_paddle.position.x - self.ball.size.width
@@ -182,20 +236,23 @@ class PongScene(Scene):
             self.ball.velocity.vx = -abs(self.ball.velocity.vx)
             self._apply_paddle_influence(self.right_paddle)
 
-        # Scoring – ball leaves left/right
-        if self.ball.position.x < 0:
-            self.right_score += 1
-            logger.info(
-                f"Right scores! {self.left_score} - {self.right_score}"
-            )
-            self._reset_ball(direction=1)
-        if self.ball.position.x > self.size.width:
-            self.left_score += 1
-            logger.info(f"Left scores! {self.left_score} - {self.right_score}")
-            self._reset_ball(direction=-1)
-
-        if self.trail_enabled and hasattr(self, "ball"):
+        # Trail should update every frame (not only on scoring)
+        if self.trail_enabled:
             self.trail.append((self.ball.position.x, self.ball.position.y))
+
+        # Scoring / out-of-bounds
+        missed_side = self._check_ball_out()  # "LEFT" / "RIGHT" / None
+        if missed_side is None:
+            return
+
+        # God mode protects ONLY P1 side (default: LEFT)
+        if self.god_mode and missed_side == P1_SIDE:
+            self._god_mode_save(missed_side)
+            return
+
+        # Otherwise, score normally and reset rally
+        self._apply_score(missed_side)
+        self._reset_rally(missed_side)
 
     def draw(self, surface: Backend):  # type: ignore[override]
         """
@@ -233,7 +290,7 @@ class PongScene(Scene):
             count = len(self.trail)
             for i, (x, y) in enumerate(self.trail):
                 t = (i + 1) / count  # 0..1
-                alpha = int(255 * t * 0.5)  # fade in, max 50% alpha
+                alpha = t * 0.5  # fade in, max 50% alpha
                 # if your ball is e.g. 12x12 rect:
                 size = 12
                 surface.draw_rect(
@@ -244,8 +301,25 @@ class PongScene(Scene):
                     (255, 255, 255, alpha),  # RGBA
                 )
 
-        self.draw_entities(surface)
-        self.draw_overlays(surface)
+        self.services.entities.draw(surface)
+        self.services.overlays.draw(surface)
+
+    def _apply_score(self, missed_side: str):
+        """
+        missed_side is the side the ball exited on:
+        - missed_side == "LEFT"  -> RIGHT scores
+        - missed_side == "RIGHT" -> LEFT scores
+        """
+        if missed_side == "LEFT":
+            self.right_score += 1
+            logger.info(
+                "Right scores! %s - %s", self.left_score, self.right_score
+            )
+        elif missed_side == "RIGHT":
+            self.left_score += 1
+            logger.info(
+                "Left scores! %s - %s", self.left_score, self.right_score
+            )
 
     def _reset_ball(self, direction: int):
         """
@@ -253,7 +327,7 @@ class PongScene(Scene):
         """
         self.ball.position.x = self.size.width / 2 - self.ball.size.width / 2
         self.ball.position.y = self.size.height / 2 - self.ball.size.height / 2
-        self.ball.velocity.vx = 250.0 * direction
+        self.ball.velocity.vx = 250.0 * float(direction)
         self.ball.velocity.vy = 200.0
 
     def _apply_paddle_influence(self, paddle: Paddle):
@@ -328,6 +402,104 @@ class PongScene(Scene):
             extra,
             color=(155, 155, 255),
         )
+
+    def _reset_rally(self, missed_side: str):
+        """
+        Reset ball and paddles after a score.
+        missed_side: side that conceded ("LEFT" or "RIGHT")
+        """
+        direction = -1 if missed_side == "LEFT" else 1
+        self._reset_ball(direction)
+
+        # Reset paddles to center
+        pad_h = self.left_paddle.size.height
+        center_y = self.size.height / 2 - pad_h / 2
+        self.left_paddle.position.y = center_y
+        self.right_paddle.position.y = center_y
+
+    def toggle_god_mode(self):
+        """
+        P1-only god mode: prevents scoring ONLY when P1 misses.
+        """
+        self.god_mode = not self.god_mode
+        logger.warning(
+            "GOD MODE (P1=%s): %s",
+            P1_SIDE,
+            "ON" if self.god_mode else "OFF",
+        )
+
+    def _clamp(self, v: float, lo: float, hi: float) -> float:
+        return max(lo, min(hi, v))
+
+    def _god_mode_save(self, missed_side: str):
+        """
+        Save the rally when the protected side misses:
+        snap ball back inside + flip vx.
+        """
+        ball = self.ball
+        w = self.size.width
+        h = self.size.height
+
+        padding = 2
+
+        # Clamp Y inside bounds
+        ball.position.y = self._clamp(
+            ball.position.y,
+            padding,
+            h - ball.size.height - padding,
+        )
+
+        vx = ball.velocity.vx
+
+        if missed_side == "LEFT":
+            ball.position.x = padding
+            ball.velocity.vx = abs(vx) if vx != 0 else 250.0
+        elif missed_side == "RIGHT":
+            ball.position.x = w - ball.size.width - padding
+            ball.velocity.vx = -abs(vx) if vx != 0 else -250.0
+
+        # If vy is too small, nudge it so it doesn't become a flat loop
+        if abs(ball.velocity.vy) < 0.01:
+            ball.velocity.vy = 0.25 * (abs(ball.velocity.vx) or 1.0)
+
+    def _check_ball_out(self) -> str | None:
+        """
+        Returns which side was missed.
+        """
+        ball = self.ball
+        w = self.size.width  # use scene size consistently
+
+        if ball.position.x + ball.size.width < 0:
+            return "LEFT"
+        if ball.position.x > w:
+            return "RIGHT"
+        return None
+
+    def toggle_slow_mo(self):
+        """
+        Toggle slow motion mode.
+        """
+        self.slow_mo = not self.slow_mo
+        # TODO: implement: timescale multiplier or halve ball velocity
+
+    def toggle_photo_mode(self):
+        """
+        Toggle photo mode overlay.
+        """
+        # TODO: reuse the “photo mode” (screenshot, UI hide, pause overlay, etc.)
+
+    def toggle_cpu_vs_cpu(self):
+        """
+        Toggle CPU control for both paddles.
+        """
+        self.cpu_vs_cpu = not self.cpu_vs_cpu
+        # TODO: swap player controller(s) to CPU, or enable CPU for both paddles
+
+    def enable_blood_mode(self):
+        """
+        Easter egg:
+        """
+        # TODO: unlock hidden difficulty / visuals / sfx / ARG hooks
 
 
 # pylint: enable=cyclic-import
