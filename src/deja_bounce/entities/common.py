@@ -4,7 +4,8 @@ Common entity mixins.
 
 from __future__ import annotations
 
-from mini_arcade_core import Backend, Position2D, Size2D
+from mini_arcade_core.backend import Backend
+from mini_arcade_core.spaces.d2 import Position2D, Size2D
 
 
 class RectDrawMixin:

@@ -2,37 +2,41 @@
 Minimal Pong-like scene using mini-arcade-core.
 """
 
-# Justification: These imports are necessary for scene management
-# and may cause cyclic imports. They will be refactored later.
-# pylint: disable=cyclic-import
-
 from __future__ import annotations
 
-from collections import deque
+from mini_arcade_core import Game
+from mini_arcade_core.backend import Backend, Event
+from mini_arcade_core.keymaps import Key
+from mini_arcade_core.scenes import Scene, register_scene
+from mini_arcade_core.spaces.d2 import KinematicData, Position2D, Size2D
 
-from mini_arcade_core import (
-    Backend,
-    Bounds2D,
-    CheatManager,
-    Event,
-    EventType,
-    Game,
-    Key,
-    KinematicData,
-    Position2D,
-    Scene,
-    Size2D,
-    VerticalBounce,
-    register_scene,
-)
-
-from deja_bounce.constants import PADDLE_SIZE, ROOT, WHITE
-from deja_bounce.controllers import CpuPaddleController
-from deja_bounce.difficulty import DIFFICULTY_PRESETS
+from deja_bounce.constants import PADDLE_SIZE
 from deja_bounce.entities import Ball, Paddle, PaddleConfig
 from deja_bounce.utils import logger
 
-P1_SIDE = "LEFT"
+from .commands import (
+    EnableTrialModeCommand,
+    PauseGameCommand,
+    PhotoModeCommand,
+    QuitCommand,
+    TakeScreenshotCommand,
+)
+from .models import PongModel, ScoreState
+from .overlays import PhotoOverlay, ScoreOverlay, WallsOverlay
+from .systems import (
+    BallOutSystem,
+    BallPaddleCollisionSystem,
+    BallWallBounceSystem,
+    CpuPaddleControlSystem,
+    CPUVsCPUSystem,
+    GodModeSystem,
+    PaddleControlSystem,
+    PongCheatsSystem,
+    ResetRallySystem,
+    SlowMoSystem,
+    TrailModeSystem,
+    WinConditionSystem,
+)
 
 
 # pylint: disable=too-many-instance-attributes
@@ -52,31 +56,10 @@ class PongScene(Scene):
         :type game: Game
         """
         super().__init__(game)
-
-        self.cheats = CheatManager(buffer_size=16)
-        self.god_mode = False
-        self.slow_mo = False
-        self.cpu_vs_cpu = False
-
-        self.bounds = Bounds2D.from_size(self.size)
-        self.ball_vertical_bounds = VerticalBounce(self.bounds)
-
-        self._set_entities()
-
-        self.left_score = 0
-        self.right_score = 0
-
-        level = self.game.settings.difficulty
-        cpu_cfg = DIFFICULTY_PRESETS.get(level, DIFFICULTY_PRESETS["normal"])
-        self.cpu = CpuPaddleController(
-            self.right_paddle, self.ball, config=cpu_cfg
+        self.model = PongModel(
+            score=ScoreState(),
         )
-
-        self.trail_enabled = False
-        self.trail = deque(maxlen=15)
-
-        self.photo_mode = False
-        self.services.overlays.add(self._photo_overlay)
+        self._set_entities()
 
     def _set_entities(self):
         pad_w, pad_h = PADDLE_SIZE
@@ -109,58 +92,45 @@ class PongScene(Scene):
                 y=self.size.height / 2 - 5,
                 width=10,
                 height=10,
-                vx=250.0,
-                vy=200.0,
+                vx=-250.0,
+                vy=-200.0,
             )
-        )
-
-        self.services.entities.add(
-            self.left_paddle, self.right_paddle, self.ball
         )
 
     def on_enter(self):
         logger.info("PongScene on_enter")
-        self.cheats.register_code(
-            "god_mode",
-            ["G", "O", "D"],
-            callback=lambda scene: scene.toggle_god_mode(),
+        self.services.input.on_quit(QuitCommand(), "quit")
+        self.services.input.on_key_down(
+            Key.T, EnableTrialModeCommand(), "trial_mode"
         )
-        self.cheats.register_code(
-            "slow_mo",
-            ["S", "L", "O", "W"],
-            callback=lambda scene: scene.toggle_slow_mo(),
+        self.services.input.on_key_down(
+            Key.ESCAPE, PauseGameCommand(), "pause_game"
         )
-        self.cheats.register_code(
-            "photo_mode",
-            ["P", "H", "O", "T", "O"],
-            callback=lambda scene: scene.toggle_photo_mode(),
+        self.services.input.on_key_down(
+            Key.P, PhotoModeCommand(), "photo_mode"
         )
-        self.cheats.register_code(
-            "cpu_vs_cpu",
-            ["C", "P", "U", "C", "P", "U"],
-            callback=lambda scene: scene.toggle_cpu_vs_cpu(),
+        self.services.input.on_key_down(
+            Key.F12, TakeScreenshotCommand(), "screenshot"
         )
-
-        # Konami-style (example)
-        self.cheats.register_code(
-            "blood_mode",
-            [
-                "UP",
-                "UP",
-                "DOWN",
-                "DOWN",
-                "LEFT",
-                "RIGHT",
-                "LEFT",
-                "RIGHT",
-                "B",
-                "A",
-            ],
-            callback=lambda scene: scene.enable_blood_mode(),
-            clear_buffer_on_match=True,
+        self.services.entities.add(
+            self.left_paddle, self.right_paddle, self.ball
         )
-
-        logger.info("Cheat codes registered")
+        self.services.overlays.add(PhotoOverlay(self.model))
+        self.services.overlays.add(WallsOverlay(self.model, self.size))
+        self.services.overlays.add(ScoreOverlay(self.model, self.size))
+        self.services.systems.add(PaddleControlSystem(self))
+        self.services.systems.add(CpuPaddleControlSystem(self))
+        self.services.systems.add(BallWallBounceSystem(self))
+        self.services.systems.add(BallPaddleCollisionSystem(self))
+        self.services.systems.add(ResetRallySystem(self))
+        self.services.systems.add(BallOutSystem(self))
+        self.services.systems.add(PongCheatsSystem(scene=self))
+        self.services.systems.add(GodModeSystem(self))
+        self.services.systems.add(SlowMoSystem(self))
+        self.services.systems.add(CPUVsCPUSystem(self))
+        self.services.systems.add(TrailModeSystem(self))
+        self.services.systems.add(WinConditionSystem(self))
+        self._systems_on_enter()
 
     def on_exit(self):
         logger.info("PongScene on_exit")
@@ -169,337 +139,21 @@ class PongScene(Scene):
         """
         Handle backend events (mini_arcade_core.Event).
         """
-        if event.type == EventType.QUIT:
-            logger.info("Quit event received")
-            self.game.quit()
+        if self._systems_handle_event(event):
             return
-
-        if event.type == EventType.KEYDOWN:
-            logger.debug(f"Key down: {event.key}")
-
-            self.cheats.process_event(event, self)
-
-            if event.key == Key.T:
-                self.trail_enabled = not self.trail_enabled
-
-            if event.key == Key.P:
-                # toggle photo mode; ensure trail on when enabled
-                self.photo_mode = not self.photo_mode
-                if self.photo_mode:
-                    self.trail_enabled = True
-
-            if event.key == Key.F12:
-                self.game.screenshot(
-                    "screenshot.bmp", str(ROOT / "screenshots")
-                )
-                logger.info("Screenshot saved: screenshot.bmp")
-                return
-
-            if event.key == Key.ESCAPE:  # ESC
-                self.game.push_scene("pause", as_overlay=True)
-                return
-
-            # Left paddle: W / S
-            if event.key == Key.W:
-                self.left_paddle.moving_up = True
-            if event.key == Key.S:
-                self.left_paddle.moving_down = True
-
-        elif event.type == EventType.KEYUP:
-            if event.key == Key.W:
-                self.left_paddle.moving_up = False
-            if event.key == Key.S:
-                self.left_paddle.moving_down = False
+        self.services.input.handle_event(event, self)
 
     def update(self, dt: float):
         """
         Update game logic. (None yet.)
         """
         self.services.entities.update(dt)
-        self.cpu.update(dt)
-
-        # Top/bottom bounce
-        self.ball_vertical_bounds.apply(self.ball)
-
-        # Paddle collisions
-        if self.ball.collider.intersects(self.left_paddle.collider):
-            self.ball.position.x = (
-                self.left_paddle.position.x + self.left_paddle.size.width
-            )
-            self.ball.velocity.vx = abs(self.ball.velocity.vx)
-            self._apply_paddle_influence(self.left_paddle)
-
-        if self.ball.collider.intersects(self.right_paddle.collider):
-            self.ball.position.x = (
-                self.right_paddle.position.x - self.ball.size.width
-            )
-            self.ball.velocity.vx = -abs(self.ball.velocity.vx)
-            self._apply_paddle_influence(self.right_paddle)
-
-        # Trail should update every frame (not only on scoring)
-        if self.trail_enabled:
-            self.trail.append((self.ball.position.x, self.ball.position.y))
-
-        # Scoring / out-of-bounds
-        missed_side = self._check_ball_out()  # "LEFT" / "RIGHT" / None
-        if missed_side is None:
-            return
-
-        # God mode protects ONLY P1 side (default: LEFT)
-        if self.god_mode and missed_side == P1_SIDE:
-            self._god_mode_save(missed_side)
-            return
-
-        # Otherwise, score normally and reset rally
-        self._apply_score(missed_side)
-        self._reset_rally(missed_side)
+        self._systems_update(dt)
 
     def draw(self, surface: Backend):  # type: ignore[override]
         """
         Draw the frame using the Backend as the 'surface'.
         """
-        # We assume backend.begin_frame/end_frame is handled by Game.
-        # Here we just draw the center line like in the original Pong.
-        line_width = 5
-        x = self.size.width // 2 - line_width // 2
-        y = 0
-        h = self.size.height
-        surface.draw_rect(x, y, line_width, h, color=WHITE)
-
-        # Scores near the top, left & right
-        score_y = 20
-
-        # Left score (slightly left of center)
-        surface.draw_text(
-            self.size.width // 4,
-            score_y,
-            str(self.left_score),
-            color=WHITE,
-        )
-
-        # Right score (slightly right of center)
-        surface.draw_text(
-            self.size.width * 3 // 4,
-            score_y,
-            str(self.right_score),
-            color=WHITE,
-        )
-
-        # Ghost trail on top of background, under ball (order up to you)
-        if self.trail_enabled and self.trail:
-            count = len(self.trail)
-            for i, (x, y) in enumerate(self.trail):
-                t = (i + 1) / count  # 0..1
-                alpha = t * 0.5  # fade in, max 50% alpha
-                # if your ball is e.g. 12x12 rect:
-                size = 12
-                surface.draw_rect(
-                    int(x - size / 2),
-                    int(y - size / 2),
-                    size,
-                    size,
-                    (255, 255, 255, alpha),  # RGBA
-                )
-
         self.services.entities.draw(surface)
+        self._systems_draw(surface)
         self.services.overlays.draw(surface)
-
-    def _apply_score(self, missed_side: str):
-        """
-        missed_side is the side the ball exited on:
-        - missed_side == "LEFT"  -> RIGHT scores
-        - missed_side == "RIGHT" -> LEFT scores
-        """
-        if missed_side == "LEFT":
-            self.right_score += 1
-            logger.info(
-                "Right scores! %s - %s", self.left_score, self.right_score
-            )
-        elif missed_side == "RIGHT":
-            self.left_score += 1
-            logger.info(
-                "Left scores! %s - %s", self.left_score, self.right_score
-            )
-
-    def _reset_ball(self, direction: int):
-        """
-        Reset ball to center, heading left (-1) or right (+1).
-        """
-        self.ball.position.x = self.size.width / 2 - self.ball.size.width / 2
-        self.ball.position.y = self.size.height / 2 - self.ball.size.height / 2
-        self.ball.velocity.vx = 250.0 * float(direction)
-        self.ball.velocity.vy = 200.0
-
-    def _apply_paddle_influence(self, paddle: Paddle):
-        """
-        Adjust ball trajectory based on:
-        - where it hit on the paddle (top/middle/bottom)
-        - paddle vertical velocity (inertia)
-        """
-        # 1) Position-based angle
-        ball_center = self.ball.position.y + self.ball.size.height / 2
-        paddle_center = paddle.position.y + paddle.size.height / 2
-        offset = (
-            ball_center - paddle_center
-        )  # >0 = lower half, <0 = upper half
-
-        # normalize offset to [-1, 1]
-        if paddle.size.height > 0:
-            norm = offset / (paddle.size.height / 2)
-        else:
-            norm = 0.0
-        norm = max(-1.0, min(1.0, norm))
-
-        base_vy = 220.0  # base vertical speed from angle
-        inertia_factor = 0.3  # how much paddle.vy affects ball.velocity.vy
-        max_vy = 400.0  # safety clamp
-
-        # angle component + inertia from paddle velocity
-        new_vy = norm * base_vy + paddle.vy * inertia_factor
-
-        # optional clamp so it doesn't go crazy fast
-        if new_vy > max_vy:
-            new_vy = max_vy
-        elif new_vy < -max_vy:
-            new_vy = -max_vy
-
-        self.ball.velocity.vy = new_vy
-
-        # (optional) tiny speed-up on each hit to make rallies more intense
-        self.ball.velocity.vx *= 1.03
-
-    def _photo_overlay(self, surface: Backend):
-        """
-        Overlay drawn on top of everything when photo_mode is enabled.
-        Perfect for promo/devlog screenshots.
-        """
-        if not self.photo_mode:
-            return
-
-        title = "Deja Bounce"
-        subtitle = "Finding the twist"
-        extra = "in a Pong-like"
-
-        # Simple positions for now – you can tune later.
-        x = 20
-        y = 60
-
-        surface.draw_text(
-            x,
-            y,
-            title,
-            color=(155, 155, 255),
-        )
-        surface.draw_text(
-            x,
-            y + 30,
-            subtitle,
-            color=(155, 155, 255),
-        )
-        surface.draw_text(
-            x,
-            y + 60,
-            extra,
-            color=(155, 155, 255),
-        )
-
-    def _reset_rally(self, missed_side: str):
-        """
-        Reset ball and paddles after a score.
-        missed_side: side that conceded ("LEFT" or "RIGHT")
-        """
-        direction = -1 if missed_side == "LEFT" else 1
-        self._reset_ball(direction)
-
-        # Reset paddles to center
-        pad_h = self.left_paddle.size.height
-        center_y = self.size.height / 2 - pad_h / 2
-        self.left_paddle.position.y = center_y
-        self.right_paddle.position.y = center_y
-
-    def toggle_god_mode(self):
-        """
-        P1-only god mode: prevents scoring ONLY when P1 misses.
-        """
-        self.god_mode = not self.god_mode
-        logger.warning(
-            "GOD MODE (P1=%s): %s",
-            P1_SIDE,
-            "ON" if self.god_mode else "OFF",
-        )
-
-    def _clamp(self, v: float, lo: float, hi: float) -> float:
-        return max(lo, min(hi, v))
-
-    def _god_mode_save(self, missed_side: str):
-        """
-        Save the rally when the protected side misses:
-        snap ball back inside + flip vx.
-        """
-        ball = self.ball
-        w = self.size.width
-        h = self.size.height
-
-        padding = 2
-
-        # Clamp Y inside bounds
-        ball.position.y = self._clamp(
-            ball.position.y,
-            padding,
-            h - ball.size.height - padding,
-        )
-
-        vx = ball.velocity.vx
-
-        if missed_side == "LEFT":
-            ball.position.x = padding
-            ball.velocity.vx = abs(vx) if vx != 0 else 250.0
-        elif missed_side == "RIGHT":
-            ball.position.x = w - ball.size.width - padding
-            ball.velocity.vx = -abs(vx) if vx != 0 else -250.0
-
-        # If vy is too small, nudge it so it doesn't become a flat loop
-        if abs(ball.velocity.vy) < 0.01:
-            ball.velocity.vy = 0.25 * (abs(ball.velocity.vx) or 1.0)
-
-    def _check_ball_out(self) -> str | None:
-        """
-        Returns which side was missed.
-        """
-        ball = self.ball
-        w = self.size.width  # use scene size consistently
-
-        if ball.position.x + ball.size.width < 0:
-            return "LEFT"
-        if ball.position.x > w:
-            return "RIGHT"
-        return None
-
-    def toggle_slow_mo(self):
-        """
-        Toggle slow motion mode.
-        """
-        self.slow_mo = not self.slow_mo
-        # TODO: implement: timescale multiplier or halve ball velocity
-
-    def toggle_photo_mode(self):
-        """
-        Toggle photo mode overlay.
-        """
-        # TODO: reuse the “photo mode” (screenshot, UI hide, pause overlay, etc.)
-
-    def toggle_cpu_vs_cpu(self):
-        """
-        Toggle CPU control for both paddles.
-        """
-        self.cpu_vs_cpu = not self.cpu_vs_cpu
-        # TODO: swap player controller(s) to CPU, or enable CPU for both paddles
-
-    def enable_blood_mode(self):
-        """
-        Easter egg:
-        """
-        # TODO: unlock hidden difficulty / visuals / sfx / ARG hooks
-
-
-# pylint: enable=cyclic-import

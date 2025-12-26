@@ -32,6 +32,7 @@
         "funcs",
         "getframe",
         "ivar",
+        "keymaps",
         "KEYUP",
         "MEIPASS",
         "onefile",

@@ -6,7 +6,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from mini_arcade_core import KinematicData, KinematicEntity, Position2D, Size2D
+from mini_arcade_core.entity import KinematicEntity
+from mini_arcade_core.spaces.d2 import KinematicData, Position2D, Size2D
 
 from deja_bounce.utils import logger
 
