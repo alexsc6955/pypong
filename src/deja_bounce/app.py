@@ -4,15 +4,16 @@ Minimal main application for Deja Bounce.
 
 from __future__ import annotations
 
-from mini_arcade_core import GameConfig, run_game
+from mini_arcade_core import GameConfig, SceneRegistry, run_game
 from mini_arcade_native_backend import NativeBackend
 
 from deja_bounce.constants import ASSETS_ROOT, FPS, WINDOW_SIZE
-from deja_bounce.scenes import MenuScene
 
 
 def run():
     """Main entry point for DejaBounce."""
+    registry = SceneRegistry(_factories={}).discover("deja_bounce.scenes")
+
     font_path = ASSETS_ROOT / "fonts" / "deja_vu_dive" / "Deja-vu_dive.ttf"
 
     backend = NativeBackend(font_path=str(font_path), font_size=24)
@@ -24,7 +25,7 @@ def run():
         fps=FPS,
         backend=backend,
     )
-    run_game(MenuScene, config=config)
+    run_game(config=config, registry=registry, initial_scene="menu")
 
 
 if __name__ == "__main__":
