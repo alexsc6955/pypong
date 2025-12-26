@@ -6,22 +6,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from mini_arcade_core import (
-    Backend,
-    KinematicData,
-    KinematicEntity,
-    Position2D,
-    Size2D,
-    SpriteEntity,
-)
+from mini_arcade_core.entity import KinematicEntity
+from mini_arcade_core.spaces.d2 import KinematicData, Position2D, Size2D
 
 from deja_bounce.utils import logger
+
+from .common import RectDrawMixin
 
 
 @dataclass
 class PaddleConfig:
     """
     Configuration for Paddle entity.
+
+    :ivar position (Position2D): Initial position of the paddle.
+    :ivar size (Size2D): Size of the paddle.
+    :ivar window_height (int): Height of the game window for clamping.
+    :ivar speed (float): Movement speed of the paddle.
     """
 
     position: Position2D
@@ -30,13 +31,17 @@ class PaddleConfig:
     speed: float = 300.0
 
 
-class Paddle(KinematicEntity):
+class Paddle(RectDrawMixin, KinematicEntity):
     """
     Paddle entity using mini-arcade-core's SpriteEntity.
     """
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def __init__(self, config: PaddleConfig):
+        """
+        :param config: Paddle configuration.
+        :type config: PaddleConfig
+        """
         data = KinematicData.rect(
             x=config.position.x,
             y=config.position.y,
@@ -54,7 +59,13 @@ class Paddle(KinematicEntity):
 
         logger.info("Paddle created")
 
-    def update(self, dt: float) -> None:  # override Entity.update
+    def update(self, dt: float):  # override Entity.update
+        """
+        Update paddle position based on input flags.
+
+        :param dt: Delta time since last update.
+        :type dt: float
+        """
         # Configure vertical velocity from input flags
         if self.moving_up:
             self.velocity.move_up(self.speed)
@@ -77,11 +88,3 @@ class Paddle(KinematicEntity):
         if self.position.y + self.size.height > self.window_height:
             self.position.y = self.window_height - self.size.height
             self.velocity.stop_y()
-
-    def draw(self, surface: Backend) -> None:  # override Entity.draw
-        surface.draw_rect(
-            int(self.position.x),
-            int(self.position.y),
-            self.size.width,
-            self.size.height,
-        )

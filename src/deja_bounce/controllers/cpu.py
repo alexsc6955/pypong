@@ -6,8 +6,11 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
+from typing import Literal
 
 from deja_bounce.entities import Ball, Paddle
+
+Side = Literal["LEFT", "RIGHT"]
 
 
 @dataclass
@@ -38,10 +41,22 @@ class CpuPaddleController:
         self,
         paddle: Paddle,
         ball: Ball,
+        side: Side = "RIGHT",
         config: CpuConfig | None = None,
-    ) -> None:
+    ):
+        """
+        :param paddle: The paddle to control.
+        :type paddle: Paddle
+
+        :param ball: The ball to track.
+        :type ball: Ball
+
+        :param config: The CPU configuration settings.
+        :type config: CpuConfig, optional
+        """
         self.paddle = paddle
         self.ball = ball
+        self.side = side
         self.config = config or CpuConfig()
 
         # Make sure paddle speed matches CPU config so movement feels consistent
@@ -53,40 +68,44 @@ class CpuPaddleController:
         m = self.config.error_margin
         return random.uniform(-m, m) if m > 0 else 0.0
 
-    def _stop(self) -> None:
+    def _stop(self):
         self.paddle.moving_up = False
         self.paddle.moving_down = False
 
     # Justification: dt is unused but kept for interface consistency
     # pylint: disable=unused-argument
-    def update(self, dt: float) -> None:
+    def update(self, dt: float):
         """
         Update CPU paddle movement based on ball position.
 
         :param dt: Delta time since last update (unused).
         :type dt: float
         """
-        # 1) If ball is moving LEFT, we don't care (we're on the right side)
-        if self.ball.velocity.vx <= 0:
+        vx = self.ball.velocity.vx
+
+        # React only when ball is coming toward THIS paddle
+        if self.side == "RIGHT" and vx <= 0:
+            self._stop()
+            return
+        if self.side == "LEFT" and vx >= 0:
             self._stop()
             return
 
-        # 2) If ball is too far from us in X, chill
-        #    (assumes CPU paddle is on the right)
-        distance_x = self.paddle.position.x - (
-            self.ball.position.x + self.ball.size.width
-        )
+        # Distance-to-react should be side-correct
+        if self.side == "RIGHT":
+            distance_x = self.paddle.position.x - (
+                self.ball.position.x + self.ball.size.width
+            )
+        else:  # LEFT
+            distance_x = self.ball.position.x - (
+                self.paddle.position.x + self.paddle.size.width
+            )
+
         if distance_x > self.config.reaction_distance:
             self._stop()
             return
 
-        # When ball comes close again (new rally), pick a new vertical error
-        if 0 < distance_x < self.config.reaction_distance * 0.9:
-            # you can make this more sophisticated; for now we keep a single offset
-            pass
-
-        # 3) Decide where to aim:
-        #    ball center + some vertical error
+        # Y aiming (same as you already have)
         ball_center = (
             self.ball.position.y
             + self.ball.size.height / 2
@@ -95,12 +114,10 @@ class CpuPaddleController:
         paddle_center = self.paddle.position.y + self.paddle.size.height / 2
         diff = ball_center - paddle_center
 
-        # 4) Dead zone -> no movement when we're "close enough"
         if abs(diff) < self.config.dead_zone:
             self._stop()
             return
 
-        # 5) Move up or down
         if diff < 0:
             self.paddle.moving_up = True
             self.paddle.moving_down = False

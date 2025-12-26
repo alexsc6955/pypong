@@ -2,9 +2,51 @@
 DejaBounce utils
 """
 
+from __future__ import annotations
+
 import logging
+import os
 import sys
+from pathlib import Path
 from typing import Optional
+
+# --------------------------------------------------------------------------------------
+# Assets
+# --------------------------------------------------------------------------------------
+
+
+def find_assets_root() -> Path:
+    """Return the path to the `assets` directory.
+
+    Works in:
+    - dev: repo/assets (when running from source tree)
+    - pip install: site-packages/assets
+    - PyInstaller onefile: _MEIPASS/assets (if bundled with --add-data)
+
+    :raises FileNotFoundError: If the assets directory cannot be found.
+    """
+    # 1) PyInstaller onefile support
+    # pylint: disable=protected-access
+    if hasattr(sys, "_MEIPASS"):
+        base = Path(sys._MEIPASS)
+        candidate = base / "assets"
+        if candidate.is_dir():
+            return candidate
+    # pylint: enable=protected-access
+
+    # 2) Dev / pip-installed: walk upwards and look for an `assets` folder
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        candidate = parent / "assets"
+        if candidate.is_dir():
+            return candidate
+
+    raise FileNotFoundError("Could not locate 'assets' directory.")
+
+
+# --------------------------------------------------------------------------------------
+# Logging helpers
+# --------------------------------------------------------------------------------------
 
 
 def _classname_from_locals(locals_: dict) -> Optional[str]:
@@ -20,99 +62,152 @@ def _classname_from_locals(locals_: dict) -> Optional[str]:
 class EnsureClassName(logging.Filter):
     """
     Populate record.classname by finding the *emitting* frame:
-    we match by (pathname, funcName) and read self/cls from its locals.
-    Falls back to "-" when not in a class context (module funcs/staticmethods).
+    match by (pathname, funcName) and read self/cls from its locals.
+    Falls back to "-" when not in a class context.
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
-        # keep any explicitly-provided classname
-        if getattr(record, "classname", None):
+        # record_factory ensures classname exists, but allow explicit override
+        if getattr(record, "classname", None) not in (None, "-"):
             return True
 
-        target_path = record.pathname  # absolute path to the file
-        target_func = record.funcName  # function name that logged
+        target_path = record.pathname
+        target_func = record.funcName
 
-        # Walk current stack; stop when we match the record’s file+func.
-        # Justification: Accessing protected member for logging purposes.
+        # Justification: Seems pretty obvious here.
         # pylint: disable=protected-access
         f = sys._getframe()
         # pylint: enable=protected-access
-        for _ in range(200):  # safety cap
+
+        for _ in range(200):
             if f is None:
                 break
             code = f.f_code
             if code.co_filename == target_path and code.co_name == target_func:
-                clsname = _classname_from_locals(f.f_locals)
-                record.classname = clsname or "-"
+                record.classname = _classname_from_locals(f.f_locals) or "-"
                 return True
             f = f.f_back
 
-        # Fallback: we didn’t find the exact frame (wrappers, C calls, etc.)
         record.classname = "-"
         return True
 
 
 class ConsoleColorFormatter(logging.Formatter):
     """
-    A custom console formatter for the logger.
-
-    This formatter allows log messages to be formatted with ANSI escape codes for colors
-    based on the log level.
+    Console formatter with ANSI colors by log level.
     """
 
     COLORS = {
-        logging.ERROR: "\033[91m",  # Red
         logging.DEBUG: "\033[96m",  # Cyan
-        logging.INFO: "\033[97m",  # White
+        logging.INFO: "\033[92m",  # Green
         logging.WARNING: "\033[93m",  # Yellow
+        logging.ERROR: "\033[91m",  # Red
         logging.CRITICAL: "\033[95m",  # Magenta
-        "RESET": "\033[0m",  # Reset color
+        "RESET": "\033[0m",
     }
 
-    def __init__(self, fmt=None, datefmt=None, style="%"):
-        """
-        :param fmt: The format string for the log message.
-        :type fmt: str, optional
-
-        :param datefmt: The format string for the date.
-        :type datefmt: str, optional
-
-        :param style: The style for the format string.
-        :type style: str, optional
-        """
-        super().__init__(fmt, datefmt, style)
-
     def format(self, record: logging.LogRecord) -> str:
-        """
-        Format the specified log record with ANSI escape codes.
+        color = self.COLORS.get(record.levelno, self.COLORS["RESET"])
+        msg = super().format(record)
+        return f"{color}{msg}{self.COLORS['RESET']}"
 
-        This method formats the log record using ANSI escape codes for colors
-        based on the log level.
 
-        :param record: The log record to be formatted.
-        :type record: logging.LogRecord
-
-        :return: The formatted log message as a string with ANSI escape codes.
-        :rtype: str
-        """
-
-        color = ConsoleColorFormatter.COLORS.get(
-            record.levelno, ConsoleColorFormatter.COLORS["RESET"]
-        )
-        formatted_record = super().format(record)
-        return (
-            f"{color}{formatted_record}{ConsoleColorFormatter.COLORS['RESET']}"
-        )
-
+# --------------------------------------------------------------------------------------
+# Global logging setup (single source of truth)
+# --------------------------------------------------------------------------------------
 
 LOGGER_FORMAT = (
     "%(asctime)s [%(levelname)-8.8s] [%(name)s] "
     "%(module)s.%(classname)s.%(funcName)s: "
     "%(message)s (%(filename)s:%(lineno)d)"
 )
-logging.basicConfig(level=logging.DEBUG, format=LOGGER_FORMAT)
+
+
+def _enable_windows_ansi():
+    """
+    Best-effort enable ANSI escape sequences on Windows terminals.
+    Newer Windows 10/11 terminals usually support this already.
+    """
+    if os.name != "nt":
+        return
+    try:
+        # Enables VT100 sequences in some consoles; harmless if unsupported
+        # Justification: Importing ctypes only on Windows is acceptable.
+        # pylint: disable=import-outside-toplevel
+        import ctypes
+
+        # pylint: enable=import-outside-toplevel
+
+        kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+        handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE = -11
+        mode = ctypes.c_uint32()
+        if kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+            # ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+            kernel32.SetConsoleMode(handle, mode.value | 0x0004)
+    # Justification: We want to catch all exceptions here.
+    # pylint: disable=broad-exception-caught
+    except Exception:
+        # If it fails, we just keep going without breaking logging.
+        pass
+    # pylint: enable=broad-exception-caught
+
+
+def _install_record_factory_defaults():
+    """
+    Ensure every LogRecord has `classname` so formatters never crash.
+    Safe to call multiple times; we keep the current factory chain.
+    """
+    old_factory = logging.getLogRecordFactory()
+
+    def record_factory(*args, **kwargs):
+        record = old_factory(*args, **kwargs)
+        if not hasattr(record, "classname"):
+            record.classname = "-"
+        return record
+
+    logging.setLogRecordFactory(record_factory)
+
+
+def configure_logging(level: int = logging.DEBUG):
+    """
+    Configure logging once for the whole app (root logger).
+    Call this early (app entrypoint). Safe to call multiple times.
+    """
+    _enable_windows_ansi()
+    _install_record_factory_defaults()
+
+    root = logging.getLogger()
+    root.setLevel(level)
+
+    # Avoid duplicate handlers if reloaded/imported multiple times
+    # We tag our handler so we can find it reliably.
+    handler_tag = "_deja_bounce_console_handler"
+
+    for h in list(root.handlers):
+        if getattr(h, handler_tag, False):
+            # Already configured
+            return
+
+    console = logging.StreamHandler(stream=sys.stdout)
+    setattr(console, handler_tag, True)
+
+    console.setFormatter(ConsoleColorFormatter(LOGGER_FORMAT))
+    console.addFilter(EnsureClassName())
+
+    # Important: don’t leave any basicConfig handlers around if someone called it earlier
+    # We remove only the plain StreamHandlers that don't have our tag.
+    for h in list(root.handlers):
+        if isinstance(h, logging.StreamHandler) and not getattr(
+            h, handler_tag, False
+        ):
+            root.removeHandler(h)
+
+    root.addHandler(console)
+
+
+# --------------------------------------------------------------------------------------
+# Public logger for DejaBounce
+# --------------------------------------------------------------------------------------
+
+configure_logging()
 logger = logging.getLogger("deja-bounce")
-logger.addFilter(EnsureClassName())
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(ConsoleColorFormatter(LOGGER_FORMAT))
-logger.addHandler(console_handler)
